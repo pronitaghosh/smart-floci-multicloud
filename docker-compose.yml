@@ -1,0 +1,14 @@
+services:
+  floci:
+    image: floci/floci:latest
+    ports:
+      - "4566:4566"
+      # floci also listens on 80/443 (emulated ALB listeners) and allocates
+      # 7000+ for per-resource proxies such as the RDS endpoint. Without these
+      # published, the ALB is reachable only from inside the floci_default
+      # network -- curl from the host just times out.
+      - "80:80"
+      - "443:443"
+      - "7000-7010:7000-7010"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

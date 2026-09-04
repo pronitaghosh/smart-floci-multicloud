@@ -1,0 +1,27 @@
+# --- Terraform ---
+# State carries the resolved DB password and the Secrets Manager secret_string
+# in plaintext. It must never be committed, even for a local-only demo.
+terraform.tfstate
+terraform.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+*.tfplan
+
+# --- Generated at deploy time ---
+# Rendered from Secrets Manager by scripts/render-k8s-config.sh and contains
+# DB_PASSWORD in cleartext. Regenerate it, never commit it.
+k8s/01-config.yaml
+
+# Written by scripts/deploy-frontend.sh and scripts/build-and-push.sh
+dist/
+build-images.txt
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+
+# --- Local scratch ---
+*.zip
+.DS_Store
+kubeconfig

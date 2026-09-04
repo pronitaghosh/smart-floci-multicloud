@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: msdemo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+        - name: gateway
+          image: 000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/gateway:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4000
+          envFrom:
+            - configMapRef:
+                name: msdemo-config
+          env:
+            - name: PORT
+              value: "4000"
+          readinessProbe:
+            httpGet: { path: /healthz, port: 4000 }
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: 4000 }
+            initialDelaySeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: msdemo
+spec:
+  # NodePort, not ClusterIP: floci's ALB runs in the floci container, which has
+  # no route to the k3s pod CIDR (10.42.0.0/16) -- only to the node itself on
+  # the floci_default docker network. Registering pod IPs with the target group
+  # therefore always health-checks as Target.Timeout. A NodePort gives the ALB
+  # an address it can actually reach. In real EKS the AWS Load Balancer
+  # Controller registers pod IPs directly and none of this is needed.
+  type: NodePort
+  selector:
+    app: gateway
+  ports:
+    - port: 4000
+      targetPort: 4000
+      nodePort: 30080

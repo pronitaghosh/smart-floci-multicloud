@@ -1,0 +1,42 @@
+#------------------------------------------------------------------
+# GitOps source of truth
+#------------------------------------------------------------------
+# ArgoCD reconciles this directory. Two consequences worth understanding:
+#
+# 1. Image references are REAL and committed, not PLACEHOLDER values patched
+#    in afterwards by `kubectl set image`. GitOps and imperative patching are
+#    incompatible -- Argo reverts the patch on the next sync. This is possible
+#    because floci's ECR registry address is deterministic:
+#      000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/<service>
+#    Against real AWS the account ID and region would come from the outputs,
+#    so `images:` below is what a CI job would rewrite on each release.
+#
+# 2. 01-config.yaml is NOT listed here. It is generated from Secrets Manager by
+#    scripts/render-k8s-config.sh and is gitignored, so Argo cannot manage it.
+#    That seam is exactly what External Secrets Operator would close; until
+#    then the ConfigMap and Secret stay script-applied.
+#------------------------------------------------------------------
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: msdemo
+
+resources:
+  - 00-namespace.yaml
+  - 10-gateway.yaml
+  - 11-user-service.yaml
+  - 12-order-service.yaml
+  - 13-payment-service.yaml
+
+# Overriding here rather than editing each Deployment keeps the tag in one
+# place -- this is the line a release pipeline bumps.
+images:
+  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/gateway
+    newTag: latest
+  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/user-service
+    newTag: latest
+  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/order-service
+    newTag: latest
+  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/payment-service
+    newTag: latest

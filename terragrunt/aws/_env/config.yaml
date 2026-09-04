@@ -1,0 +1,243 @@
+#------------------------------------------------------------------
+# msdemo — base configuration
+#------------------------------------------------------------------
+# The single input for every stack. Correct for REAL AWS as written; the
+# global.floci_compat switch below is the entire local-emulator surface.
+#------------------------------------------------------------------
+
+global:
+  client_name: msdemo
+  environment: dev
+  region: us-east-1
+  default_az: us-east-1a
+  endpoint_url: http://localhost:4566
+
+  # floci cannot emulate a handful of behaviours faithfully. Rather than
+  # scattering flags through 13 modules, one switch is honoured in exactly
+  # three places, each commented at the point of use:
+  #   composite-stateful  -> RDS storage_encrypted/kms_key_id, cache subnet group
+  #   composite-standard  -> CloudFront disabled entirely
+  # Set false to target real AWS with everything enabled.
+  floci_compat: true
+
+  # Where pods reach the emulated AWS API. A pod's localhost is its own
+  # loopback, so this is floci's address on the docker network.
+  in_cluster_endpoint_url: http://172.18.0.2:4566
+  tags:
+    Owner: eloka
+    Project: msdemo
+    Purpose: floci-demo
+  provider_aliases:
+    us_east_1:
+      region: us-east-1
+      description: "CloudFront requires its ACM certificate in us-east-1"
+
+#------------------------------------------------------------------
+# Stack: bootstrap
+#------------------------------------------------------------------
+
+network:
+  name: msdemo
+  cidr: 10.20.0.0/16
+  enable_dns_support: true
+  enable_dns_hostnames: true
+  subnets:
+    - { name: public-us-east-1a, cidr: 10.20.0.0/24, availability_zone: us-east-1a, type: public }
+    - { name: public-us-east-1b, cidr: 10.20.1.0/24, availability_zone: us-east-1b, type: public }
+    - { name: private-us-east-1a, cidr: 10.20.10.0/24, availability_zone: us-east-1a, type: private }
+    - { name: private-us-east-1b, cidr: 10.20.11.0/24, availability_zone: us-east-1b, type: private }
+  security_groups:
+    - name: shared
+      description: "Shared SG for EKS nodes, RDS access"
+      ingress:
+        - { description: Intra-VPC, from_port: 0, to_port: 0, protocol: "-1", cidr_blocks: ["10.20.0.0/16"] }
+    - name: alb
+      description: "Allow HTTP/HTTPS from the internet"
+      ingress:
+        - { description: HTTP, from_port: 80, to_port: 80, protocol: tcp, cidr_blocks: ["0.0.0.0/0"] }
+        - { description: HTTPS, from_port: 443, to_port: 443, protocol: tcp, cidr_blocks: ["0.0.0.0/0"] }
+    - name: redis
+      description: "Allow Redis access from within the VPC"
+      ingress:
+        - { description: Redis, from_port: 6379, to_port: 6379, protocol: tcp, cidr_blocks: ["10.20.0.0/16"] }
+
+kms_keys:
+  - name: key
+    description: "msdemo demo encryption key"
+    deletion_window_in_days: 7
+    enable_key_rotation: true
+
+ecr_repositories:
+  - { name: frontend }
+  - { name: gateway }
+  - { name: user-service }
+  - { name: order-service }
+  - { name: payment-service }
+
+buckets:
+  - name: msdemo-frontend-static
+    versioning: Enabled
+    kms_key_name: key
+    block_public_access: true
+    allow_cloudfront_read: true
+
+acm_certificates:
+  - { name: alb, domain_name: msdemo.local, validation_method: DNS }
+
+#------------------------------------------------------------------
+# Stack: iam
+#------------------------------------------------------------------
+
+iam_roles:
+  - name: msdemo-cluster-cluster-role
+    trusted_service: eks.amazonaws.com
+    managed_policy_arns:
+      - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+
+  - name: msdemo-cluster-node-role
+    trusted_service: ec2.amazonaws.com
+    managed_policy_arns:
+      - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+      - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+      - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
+  - name: msdemo-cluster-app-role
+    trusted_service: ec2.amazonaws.com
+    inline_policies:
+      - name: msdemo-cluster-app-secrets-ssm-s3
+        statements:
+          - { actions: ["secretsmanager:GetSecretValue"] }
+          - { actions: ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"] }
+          - { actions: ["s3:GetObject", "s3:PutObject", "s3:ListBucket"] }
+
+#------------------------------------------------------------------
+# Stack: stateful
+#------------------------------------------------------------------
+
+rds_instances:
+  - name: postgres
+    engine: postgres
+    engine_version: "16"
+    instance_class: db.t3.micro
+    allocated_storage: 20
+    db_name: msdemo
+    username: msdemo_admin
+    password: "__DB_PASSWORD__"
+    storage_encrypted: true
+    kms_key_name: key
+    skip_final_snapshot: true
+    publicly_accessible: false
+
+elasticache_clusters:
+  - name: redis
+    engine: redis
+    node_type: cache.t3.micro
+    num_cache_clusters: 1
+    port: 6379
+    description: "msdemo caching layer"
+    create_subnet_group: true
+
+vault_static:
+  # The AWS half of Vault: an auto-unseal key and the secret containers its
+  # root token lands in. Vault calls kms:Encrypt/Decrypt on every seal and
+  # unseal, so this genuinely exercises the emulated KMS.
+  - name: msdemo
+    unseal_key_deletion_window: 7
+    store_root_token: true
+    store_recovery_keys: true
+
+secrets:
+  # Values are assembled by composite-stateful from this stack's own outputs —
+  # the RDS endpoint and Redis endpoint are not known until apply time.
+  - name: msdemo/app-credentials
+    description: "Application database and cache credentials"
+    kms_key_name: key
+    values: {}
+
+  # Container only. The platform stack writes the real value with
+  # put-secret-value once ArgoCD has generated it.
+  - name: msdemo/argocd-admin
+    description: "ArgoCD initial admin password"
+    kms_key_name: key
+    values: {}
+
+#------------------------------------------------------------------
+# Stack: standard
+#------------------------------------------------------------------
+
+clusters:
+  - name: msdemo-cluster
+    kubernetes_version: "1.29"
+    cluster_role_name: msdemo-cluster-cluster-role
+    node_groups:
+      - name: msdemo-cluster-ng
+        node_role_name: msdemo-cluster-node-role
+        instance_types: [t3.medium]
+        desired_size: 2
+        min_size: 1
+        max_size: 3
+
+load_balancers:
+  - name: msdemo-alb
+    internal: false
+    target_groups:
+      # scripts/register-alb-targets.sh looks this name up verbatim.
+      - name: msdemo-gateway-tg
+        port: 80
+        protocol: HTTP
+        target_type: ip
+        health_check:
+          path: /healthz
+          healthy_threshold: 2
+          unhealthy_threshold: 3
+          interval: 15
+          timeout: 5
+    listeners:
+      - { port: 80, protocol: HTTP, default_target_group: msdemo-gateway-tg }
+      - { port: 443, protocol: HTTPS, default_target_group: msdemo-gateway-tg, certificate_name: alb }
+
+cloudfront_distributions:
+  - name: frontend
+    bucket_name: msdemo-frontend-static
+    aliases: [msdemo.local]
+    default_root_object: index.html
+    comment: "msdemo frontend distribution"
+    certificate_name: frontend
+    certificate_provider_alias: us_east_1
+
+#------------------------------------------------------------------
+# Stack: platform
+#------------------------------------------------------------------
+# Runs after standard, because Helm needs a cluster to install into.
+#------------------------------------------------------------------
+
+vault:
+  - name: msdemo
+    namespace: vault
+    chart_version: "0.29.1"
+    # Single-node k3s: 3 replicas would leave two Pending, so the chart's
+    # anti-affinity is cleared in the module. Drop to 1 if PVCs do not bind.
+    replicas: 3
+    data_storage: true
+    data_storage_size: 1Gi
+    # awskms auto-unseal against floci's KMS. Set false for Shamir, in which
+    # case the unseal keys go to Secrets Manager instead.
+    auto_unseal: true
+
+argocd:
+  - name: argocd
+    namespace: argocd
+    chart_version: "7.7.11"
+    # Argo's Application CRs are installed by a second chart, because
+    # kubernetes_manifest would need the CRD to exist at plan time.
+    apps_chart_version: "2.0.2"
+    # Argo owns everything under this path. The repo must be reachable from
+    # inside the cluster, and public until a deploy key is configured.
+    repo_url: https://github.com/elokac/floci-aws-demo.git
+    target_revision: main
+    path: k8s
+    destination_namespace: msdemo
+    auto_sync: true
+    self_heal: true
+    prune: false
+    admin_password_secret_name: msdemo/argocd-admin

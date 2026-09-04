@@ -1,0 +1,83 @@
+{
+  "acm_certificate_arn": "arn:aws:acm:us-east-1:000000000000:certificate/29d0b232-4305-4908-9b26-40619e39e310",
+  "acm_certificate_arns": {
+    "alb": "arn:aws:acm:us-east-1:000000000000:certificate/29d0b232-4305-4908-9b26-40619e39e310"
+  },
+  "all_subnet_ids": [
+    "subnet-17ade176",
+    "subnet-abaa1f1f",
+    "subnet-2ec73068",
+    "subnet-4dd4bbf2"
+  ],
+  "bucket_ids": {
+    "msdemo-frontend-static": "msdemo-frontend-static"
+  },
+  "bucket_regional_domain_names": {
+    "msdemo-frontend-static": "msdemo-frontend-static.s3.us-east-1.amazonaws.com"
+  },
+  "ecr_repository_urls": {
+    "frontend": "000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/frontend",
+    "gateway": "000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/gateway",
+    "order-service": "000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/order-service",
+    "payment-service": "000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/payment-service",
+    "user-service": "000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/user-service"
+  },
+  "frontend_bucket": "msdemo-frontend-static",
+  "kms_key_arn": "arn:aws:kms:us-east-1:000000000000:key/18f80087-9237-4481-950f-eb0269f2e523",
+  "kms_key_arns": {
+    "key": "arn:aws:kms:us-east-1:000000000000:key/18f80087-9237-4481-950f-eb0269f2e523"
+  },
+  "private_subnet_ids": [
+    "subnet-17ade176",
+    "subnet-abaa1f1f"
+  ],
+  "public_subnet_ids": [
+    "subnet-2ec73068",
+    "subnet-4dd4bbf2"
+  ],
+  "security_group_ids": {
+    "alb": "sg-9456391d4babdf9b9",
+    "redis": "sg-489d488594dea9fcb",
+    "shared": "sg-974bb139a54316d30"
+  },
+  "ssm_parameter_prefix": "/msdemo/",
+  "subnet_ids": {
+    "msdemo-private-us-east-1a": "subnet-17ade176",
+    "msdemo-private-us-east-1b": "subnet-abaa1f1f",
+    "msdemo-public-us-east-1a": "subnet-2ec73068",
+    "msdemo-public-us-east-1b": "subnet-4dd4bbf2"
+  },
+  "vpc_id": "vpc-029c41c0",
+  "app_role_arn": "arn:aws:iam::000000000000:role/msdemo-cluster-app-role",
+  "role_arns": {
+    "msdemo-cluster-app-role": "arn:aws:iam::000000000000:role/msdemo-cluster-app-role",
+    "msdemo-cluster-cluster-role": "arn:aws:iam::000000000000:role/msdemo-cluster-cluster-role",
+    "msdemo-cluster-node-role": "arn:aws:iam::000000000000:role/msdemo-cluster-node-role"
+  },
+  "role_names": {
+    "msdemo-cluster-app-role": "msdemo-cluster-app-role",
+    "msdemo-cluster-cluster-role": "msdemo-cluster-cluster-role",
+    "msdemo-cluster-node-role": "msdemo-cluster-node-role"
+  },
+  "app_secret_arn": "arn:aws:secretsmanager:us-east-1:000000000000:secret:msdemo/app-credentials-Q5PF0I",
+  "rds_endpoint": "172.18.0.2:7001",
+  "rds_endpoints": {
+    "postgres": "172.18.0.2:7001"
+  },
+  "redis_endpoint": "localhost",
+  "redis_endpoints": {
+    "redis": "localhost"
+  },
+  "secret_arns": {
+    "msdemo/app-credentials": "arn:aws:secretsmanager:us-east-1:000000000000:secret:msdemo/app-credentials-Q5PF0I"
+  },
+  "alb_dns_name": "msdemo-alb-323b2a118f6d45ae.elb.localhost.floci.io",
+  "eks_cluster_endpoint": "https://localhost:6500",
+  "eks_cluster_name": "msdemo-cluster",
+  "eks_cluster_names": {
+    "msdemo-cluster": "msdemo-cluster"
+  },
+  "target_group_arns": {
+    "msdemo-gateway-tg": "arn:aws:elasticloadbalancing:us-east-1:000000000000:targetgroup/msdemo-gateway-tg/14125eece5e44799"
+  }
+}

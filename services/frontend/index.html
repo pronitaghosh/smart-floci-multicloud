@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>floci Microservices Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; }
+    h1 { font-size: 1.4rem; }
+    input, button { padding: 8px; margin: 4px 0; width: 100%; box-sizing: border-box; }
+    button { cursor: pointer; }
+    pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+    section { margin-bottom: 32px; }
+  </style>
+</head>
+<body>
+  <h1>floci Microservices Demo</h1>
+  <p>Frontend served from S3 via CloudFront. Talks to the gateway service through the ALB.</p>
+
+  <section>
+    <h2>Create user</h2>
+    <input id="email" placeholder="email" />
+    <input id="name" placeholder="name" />
+    <button onclick="createUser()">Create user</button>
+    <pre id="userResult"></pre>
+  </section>
+
+  <section>
+    <h2>Create order</h2>
+    <input id="userId" placeholder="user_id" />
+    <input id="item" placeholder="item" />
+    <input id="amount" placeholder="amount_cents" />
+    <button onclick="createOrder()">Create order</button>
+    <pre id="orderResult"></pre>
+  </section>
+
+  <script>
+    // Set at deploy time to the ALB DNS name (see ssm parameter /msdemo/gateway_url)
+    const GATEWAY_URL = window.GATEWAY_URL || 'http://localhost:8080';
+
+    async function createUser() {
+      const email = document.getElementById('email').value;
+      const name = document.getElementById('name').value;
+      const res = await fetch(`${GATEWAY_URL}/api/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name }),
+      });
+      document.getElementById('userResult').textContent = JSON.stringify(await res.json(), null, 2);
+    }
+
+    async function createOrder() {
+      const user_id = Number(document.getElementById('userId').value);
+      const item = document.getElementById('item').value;
+      const amount_cents = Number(document.getElementById('amount').value);
+      const res = await fetch(`${GATEWAY_URL}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id, item, amount_cents }),
+      });
+      document.getElementById('orderResult').textContent = JSON.stringify(await res.json(), null, 2);
+    }
+  </script>
+</body>
+</html>

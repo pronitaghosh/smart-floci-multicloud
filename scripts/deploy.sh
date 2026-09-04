@@ -62,6 +62,14 @@ else
   kubectl apply -k k8s/
 fi
 
+# A mutable :latest tag means a new image does NOT change the manifest, so
+# neither `kubectl apply` nor an ArgoCD sync will restart anything -- the old
+# pods keep running the old code, and a fix appears to do nothing. Restarting
+# explicitly is the honest price of a mutable tag. It also re-reads the
+# ConfigMap, which envFrom only injects at pod start.
+echo "=== Restarting deployments to pick up :latest and current config ==="
+kubectl rollout restart deployment -n msdemo >/dev/null 2>&1 || true
+
 echo "=== Waiting for rollout ==="
 for svc in gateway user-service order-service payment-service; do
   kubectl rollout status "deployment/$svc" -n msdemo --timeout=180s || true

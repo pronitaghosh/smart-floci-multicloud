@@ -16,6 +16,20 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/outputs.sh"
 
 RDS_ENDPOINT=$(tf_out rds_endpoint)        # host:port
 REDIS_ENDPOINT=$(tf_out redis_endpoint)    # host only; empty when disabled
+
+# floci reports the ElastiCache endpoint as the literal string "localhost".
+# That is a control-plane value with no data plane behind it -- unlike EKS, RDS
+# and ECR, floci starts no container for ElastiCache. From inside a pod
+# "localhost" is the pod's own loopback, so the client dials itself and
+# node-redis retries forever. Treat it as "no cache" rather than passing it on.
+case "$REDIS_ENDPOINT" in
+  localhost|127.0.0.1|"")
+    if [ -n "$REDIS_ENDPOINT" ]; then
+      echo "  note: elasticache endpoint is '${REDIS_ENDPOINT}' -- not reachable from a pod; caching disabled" >&2
+    fi
+    REDIS_ENDPOINT=""
+    ;;
+esac
 ALB_DNS=$(tf_out alb_dns_name)
 
 if [ -z "$RDS_ENDPOINT" ]; then

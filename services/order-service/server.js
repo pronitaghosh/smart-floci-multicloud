@@ -115,21 +115,28 @@ app.post('/orders', async (req, res) => {
 });
 
 const port = process.env.PORT || 4002;
+
 app.listen(port, async () => {
-  if (redis) {
-    try {
-      await redis.connect();
-    } catch (err) {
-      console.error('redis connect failed, running without cache:', err.message);
-    }
-  } else {
-    console.log('REDIS_HOST unset -- caching disabled');
-  }
+  // Schema FIRST. Connecting to the cache used to come first, and node-redis
+  // retries a bad address indefinitely rather than rejecting -- so an
+  // unreachable cache silently prevented the tables from ever being created,
+  // and every request failed with 'relation "orders" does not exist'.
+  // The database is required; the cache is not. Order accordingly.
   try {
     await ensureSchema();
     console.log(`order-service listening on ${port}, schema ready`);
   } catch (err) {
-    console.error('schema init failed, will retry on first query:', err.message);
+    console.error('schema init failed:', err.message);
     console.log(`order-service listening on ${port}`);
+  }
+
+  // Fire-and-forget: never let the cache hold up serving traffic.
+  if (redis) {
+    redis
+      .connect()
+      .then(() => console.log('cache connected'))
+      .catch((err) => console.error('cache unavailable, running without it:', err.message));
+  } else {
+    console.log('cache disabled (REDIS_HOST unset)');
   }
 });

@@ -1,3 +1,19 @@
+# --- Terragrunt ---
+# Local backend state. Contains the resolved DB password and the Secrets
+# Manager secret_string in plaintext -- never commit it. Moving state into
+# floci does not help here: the file still lands on disk.
+.state/
+
+# Per-stack working copies of the modules plus generated provider/backend
+# files. Pure build artefacts; ~660 files of noise in a diff.
+.terragrunt-cache/
+.tfplan/
+tg-gen-*.tf
+dynamic_modules.tf
+
+# Merged stack outputs, rebuilt by scripts/lib/outputs.sh on demand.
+.outputs.json
+
 # --- Terraform ---
 # State carries the resolved DB password and the Secrets Manager secret_string
 # in plaintext. It must never be committed, even for a local-only demo.

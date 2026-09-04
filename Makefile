@@ -120,6 +120,10 @@ targets: ## Register the gateway NodePort with the ALB target group
 frontend: ## Inject the ALB DNS into the frontend and sync to S3
 	@./scripts/deploy-frontend.sh
 
+restart: ## Restart the workloads (picks up a new :latest image and ConfigMap)
+	@kubectl rollout restart deployment -n msdemo
+	@kubectl rollout status deployment/order-service -n msdemo --timeout=120s
+
 verify: ## Run the functional verification suite
 	@./verify.sh
 
@@ -188,5 +192,5 @@ clean: ## Remove generated files and caches (not state)
 
 .PHONY: help check-floci fmt validate plan apply destroy output \
         plan-all apply-all destroy-all outputs images deploy targets \
-        frontend verify up down clean vault-status vault-token vault-ui \
+        frontend verify restart up down clean vault-status vault-token vault-ui \
         argocd-sync argocd-refresh argocd-password argocd-ui kubeconfig

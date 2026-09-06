@@ -38,6 +38,7 @@ node_modules/
 npm-debug.log*
 
 # --- Local scratch ---
+repro/
 *.zip
 .DS_Store
 kubeconfig

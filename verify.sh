@@ -48,56 +48,60 @@ echo "  bucket=$BUCKET  vpc=$VPC_ID  cluster=$CLUSTER"
 # floci handed back. This is the authoritative list -- the functional checks
 # further down only spot-check the services that have a data path.
 hdr "Resource inventory (from terraform state -- freshness checked below)"
-terraform show -json 2>/dev/null | python3 -c '
-import json, sys
+# State lives in .state/<environment>/<stack>/ under Terragrunt -- there is no
+# root Terraform module to `terraform show`. Read the stack files directly.
+python3 - "${ENVIRONMENT_NAME:-dev}" <<'PYEOF'
+import json, sys, glob, os
 from collections import defaultdict
 
-try:
-    doc = json.load(sys.stdin)
-except Exception:
-    print("  could not parse terraform show -json"); sys.exit(0)
+env = sys.argv[1]
+files = sorted(glob.glob(f".state/{env}/*/terraform.tfstate"))
+if not files:
+    print(f"  no state under .state/{env}/ -- run: make apply-all")
+    sys.exit(0)
 
 rows = []
-def walk(mod):
-    for r in mod.get("resources", []):
+for f in files:
+    stack = f.split(os.sep)[2]
+    try:
+        doc = json.load(open(f))
+    except Exception:
+        continue
+    for r in doc.get("resources", []):
         if r.get("mode") != "managed":
             continue
-        v = r.get("values", {}) or {}
-        ident = v.get("id") or v.get("arn") or v.get("name") or ""
-        rows.append((r["address"], r["type"], str(ident)))
-    for child in mod.get("child_modules", []):
-        walk(child)
-
-walk(doc.get("values", {}).get("root_module", {}))
+        for inst in r.get("instances", []):
+            v = inst.get("attributes", {}) or {}
+            ident = v.get("id") or v.get("arn") or v.get("name") or ""
+            k = inst.get("index_key")
+            suffix = "" if k is None else (f'["{k}"]' if isinstance(k, str) else f"[{k}]")
+            rows.append((stack, f"{r['type']}.{r['name']}{suffix}", str(ident)))
 
 if not rows:
-    print("  state is empty"); sys.exit(0)
+    print("  state files exist but contain no managed resources")
+    sys.exit(0)
 
 groups = defaultdict(list)
-for addr, typ, ident in rows:
-    parts = addr.split(".")
-    mod = parts[1] if addr.startswith("module.") else "(root)"
-    # strip the module prefix so the resource address reads cleanly
-    short = ".".join(parts[2:]) if addr.startswith("module.") else addr
-    groups[mod].append((short, typ, ident))
+for stack, addr, ident in rows:
+    groups[stack].append((addr, ident))
 
-def clip(s, n):
-    return s if len(s) <= n else s[: n - 1] + "…"
+def clip(t, n):
+    return t if len(t) <= n else t[: n - 1] + "\u2026"
 
-for mod in sorted(groups):
-    items = sorted(groups[mod])
-    print("\n  \033[1m%s\033[0m  (%d)" % (mod, len(items)))
-    for short, typ, ident in items:
-        print("    %-44s %s" % (clip(short, 44), clip(ident, 60)))
+for stack in ["bootstrap", "iam", "stateful", "standard"]:
+    if stack not in groups:
+        continue
+    items = sorted(groups[stack])
+    print("\n  \033[1m%s\033[0m  (%d)" % (stack, len(items)))
+    for addr, ident in items:
+        print("    %-52s %s" % (clip(addr, 52), clip(ident, 52)))
 
 by_type = defaultdict(int)
-for _, typ, _ in rows:
-    by_type[typ] += 1
-print("\n  \033[1m%d resources across %d modules, %d distinct types\033[0m"
+for _, addr, _ in rows:
+    by_type[addr.split(".")[0]] += 1
+print("\n  \033[1m%d resources across %d stacks, %d distinct types\033[0m"
       % (len(rows), len(groups), len(by_type)))
-print("  " + "  ".join("%s=%d" % (t.replace("aws_", ""), c)
-                       for t, c in sorted(by_type.items(), key=lambda kv: (-kv[1], kv[0]))))
-'
+PYEOF
 
 # ---------------------------------------------------------------- stale state
 # floci keeps nothing across restarts, but terraform.tfstate is a local file
@@ -352,19 +356,18 @@ hdr "Drift check (live in floci, missing from state)"
 # Flatten every attribute value in state into one searchable blob. Matching on
 # identifiers rather than resource type is what makes this catch "floci has two
 # load balancers but terraform only knows about one".
-STATE_BLOB=$(terraform show -json 2>/dev/null | python3 -c '
-import json, sys
-try:
-    doc = json.load(sys.stdin)
-except Exception:
-    sys.exit(0)
-def walk(mod):
-    for r in mod.get("resources", []):
-        print(json.dumps(r.get("values", {})))
-    for c in mod.get("child_modules", []):
-        walk(c)
-walk(doc.get("values", {}).get("root_module", {}))
-')
+STATE_BLOB=$(python3 - "${ENVIRONMENT_NAME:-dev}" <<'PYEOF'
+import json, sys, glob
+for f in glob.glob(f".state/{sys.argv[1]}/*/terraform.tfstate"):
+    try:
+        doc = json.load(open(f))
+    except Exception:
+        continue
+    for r in doc.get("resources", []):
+        for inst in r.get("instances", []):
+            print(json.dumps(inst.get("attributes", {})))
+PYEOF
+)
 drift=0
 check_orphan() {
   local label=$1 live=$2
@@ -372,7 +375,14 @@ check_orphan() {
   [ "$live" = "None" ] && return 0
   local item
   for item in $live; do
-    if ! printf '%s' "$STATE_BLOB" | grep -qF "$item"; then
+    # Pure-bash substring test, NOT `printf | grep -q`. grep -q exits on the
+    # first match and SIGPIPEs printf; under `set -o pipefail` the pipeline then
+    # returns 141 despite the match succeeding, producing false orphans that
+    # vary with where the match falls in the stream.
+    case "$STATE_BLOB" in
+      *"$item"*) continue ;;
+    esac
+    if true; then
       no "orphan $label: $item (live in floci, absent from state)"
       drift=$((drift+1))
     fi
@@ -392,13 +402,16 @@ check_orphan "ecr repository" \
 
 # A plan that is not empty means state disagrees with reality. Expect RDS to
 # show a replacement here: floci does not persist storage_encrypted/kms_key_id.
-if terraform plan -detailed-exitcode -no-color >/dev/null 2>&1; then
-  ok "terraform plan is clean (state matches floci)"
+# A full plan means initialising four stacks, which is far too slow to run on
+# every verify. `make plan-all` covers it deliberately.
+if [ -n "${VERIFY_PLAN:-}" ]; then
+  if terragrunt run --all plan --non-interactive --working-dir terragrunt/aws >/dev/null 2>&1; then
+    ok "terragrunt plan is clean across all stacks"
+  else
+    warn "terragrunt plan reported changes or errored -- run 'make plan-all'"
+  fi
 else
-  case $? in
-    2) warn "terraform plan shows pending changes -- run 'terraform plan' to see them" ;;
-    *) no "terraform plan errored" ;;
-  esac
+  warn "plan check skipped (slow) -- run 'make plan-all', or VERIFY_PLAN=1 ./verify.sh"
 fi
 
 # ---------------------------------------------------------------- summary

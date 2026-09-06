@@ -1,159 +1,206 @@
 # floci-aws-demo
 
-A complete AWS microservices stack — VPC, EKS, RDS, ALB, ECR, S3, KMS, Secrets
-Manager, SSM — described in Terraform and applied entirely on a laptop against
-[floci](https://floci.io), a local AWS emulator. No AWS account, no cloud spend.
+A production-shaped AWS platform described in Terraform, orchestrated by
+Terragrunt across four layered stacks, and applied entirely on a laptop against
+[floci](https://floci.io), a local AWS emulator. VPC, EKS, RDS, ElastiCache, ALB,
+ECR, S3, KMS, Secrets Manager, SSM, **HashiCorp Vault** and **ArgoCD**.
 
-**52 Terraform resources. 4 Node microservices. One `docker compose up`.**
+No AWS account. No cloud spend. Four Node microservices actually serving traffic
+through an emulated load balancer, deployed by GitOps.
 
 ![Architecture](docs/architecture.png)
 
-## Why bother
+## Why
 
-Terraform's feedback loop against real AWS is brutal: an EKS cluster takes ~15
-minutes to create and ~10 to destroy, so a typo in a security group rule costs
-half an hour. Running the same config locally turns that into seconds, and it
-means you can put `terraform apply` in a test suite.
+Terraform's feedback loop against real AWS is punishing: an EKS cluster takes
+~15 minutes to create and ~10 to destroy, so a typo in a security group rule
+costs half an hour. Running the same configuration locally turns that into
+seconds.
 
 The catch is fidelity. An emulator that accepts your API calls but doesn't
-behave like AWS gives false confidence. This repo is as much a record of *where
-floci's fidelity ends* as it is a demo — see [Gotchas](#gotchas).
+behave like AWS gives false confidence. So this repo is also a record of **where
+floci's fidelity ends**: see [docs/floci-gaps.md](docs/floci-gaps.md).
 
 ## Quickstart
 
-Requires Docker Desktop, Terraform ≥ 1.10, the AWS CLI, and kubectl.
+Requires Docker Desktop, Terraform ≥ 1.10, Terragrunt ≥ 1.0, the AWS CLI and kubectl.
 
 ```bash
 git clone https://github.com/elokac/floci-aws-demo.git
 cd floci-aws-demo
 
-# 1. start floci
-docker compose up -d
-
-# 2. build the whole stack: terraform apply -> images -> k8s -> ALB -> frontend
-./scripts/rebuild-all.sh
+docker compose up -d      # start floci
+make up                   # apply 4 stacks -> build images -> deploy -> ALB -> frontend
 ```
 
-Then exercise it end to end:
+Then exercise the whole chain:
 
 ```bash
-ALB=$(terraform output -raw alb_dns_name)
+ALB=$(./scripts/lib/outputs.sh alb_dns_name)
 
-curl -s -X POST "http://$ALB/api/users" \
-  -H 'Content-Type: application/json' \
+curl -s -X POST "http://$ALB/api/users" -H 'Content-Type: application/json' \
   -d '{"name":"ada","email":"ada@example.com"}'
 
-curl -s -X POST "http://$ALB/api/orders" \
-  -H 'Content-Type: application/json' \
+curl -s -X POST "http://$ALB/api/orders" -H 'Content-Type: application/json' \
   -d '{"user_id":1,"item":"widget","amount_cents":4200}'
 ```
 
-A `201` with `"status":"paid"` means the whole chain worked: ALB → gateway →
+A `201` with `"status":"paid"` means every layer worked: ALB → gateway →
 order-service → Postgres → payment-service → back.
 
-## What you get
+![Application pods running on the emulated EKS cluster](docs/k8s-workloads.png)
 
-| Layer | Terraform | What floci actually runs |
+Four services at two replicas each, scheduled by a real scheduler onto the k3s
+node, pulling their images from the emulated ECR. The `Terminating` rows aged 11
+days are not a hung deploy. They are pods left behind by an earlier floci, which
+is [divergence 6](docs/floci-gaps.md#6-floci-discards-all-state-when-its-container-is-recreated).
+
+`make help` lists everything else.
+
+## The stacks
+
+Four Terragrunt stacks, applied in dependency order. Each is one directory; the
+directory name **is** the composite module name.
+
+```
+bootstrap ─→ iam ─→ stateful ─→ standard
+```
+
+| Stack | Contains | Why here |
 |---|---|---|
-| Network | VPC, 4 subnets, IGW, route tables, SGs | metadata only |
-| Compute | EKS cluster + node group | a real **k3s** container |
-| Data | RDS Postgres | a real **postgres:16** container |
-| Registry | 5 ECR repositories | a real **registry:2** container |
-| Traffic | ALB, 2 listeners, target group | an HTTP proxy on `:80`/`:443` |
-| Cache | ElastiCache Redis replication group | in-process emulation |
-| Config | KMS, Secrets Manager, 7 SSM params | in-process emulation |
-| Static | S3 bucket, policy, SSE, versioning | in-process emulation |
+| **bootstrap** | VPC, subnets, routing, security groups, KMS, ECR, S3, ACM, SSM | nothing exists without it |
+| **iam** | cluster / node / app roles and policies | its own layer by convention |
+| **stateful** | RDS, ElastiCache, Secrets Manager, Vault's KMS unseal key | data-bearing; slowest to rebuild |
+| **standard** | EKS, ALB, CloudFront, Vault, ArgoCD, SSM | everything that needs the layers below |
 
-The interesting column is the third one. floci doesn't fake EKS — it starts
-k3s and hands you a genuine Kubernetes API. Same for RDS and ECR. That's why
-the app is really running, not merely "created".
+Environments are **environment variables, not directories**. `ENVIRONMENT_NAME=staging make apply-all`
+is the whole story, and state separates itself under `.state/<env>/<stack>/`.
+
+Values cross stacks through a `resolved:` block folded into the YAML config by
+each leaf `terragrunt.hcl`, so a composite module still takes exactly one
+variable and never learns that four separate states exist.
+
+## One config drives everything
+
+[`terragrunt/aws/_env/config.yaml`](terragrunt/aws/_env/config.yaml) is the only
+input. Composite modules take `variable "config" { type = string }` and
+`yamldecode` it; nothing is passed as ordinary tfvars.
+
+It is written to be **correct for real AWS**. A single switch,
+`global.floci_compat`, is the entire local-emulator surface. It is honoured in
+three places, each commented at the point of use.
 
 ## Layout
 
 ```
 .
-├── main.tf  variables.tf  outputs.tf  providers.tf
-├── modules/          13 Terraform modules, one per service
-├── services/         4 Node services + the static frontend
-│   ├── gateway/          :4000  proxies to the others
-│   ├── user-service/     :4001  Postgres
-│   ├── order-service/    :4002  Postgres + optional Redis
-│   └── payment-service/  :4003  mock charges
-├── k8s/              Deployments/Services (01-config.yaml is generated)
-├── scripts/          build, deploy, register, rebuild
-└── verify.sh         inventory + functional checks + drift detection
+├── Makefile                    the interface: `make help`
+├── terraform/                  ---- modules monorepo half ----
+│   └── modules/
+│       ├── composite-{bootstrap,iam,stateful,standard}/
+│       ├── networking/  kms-key/  ecr-repository/  s3-buckets/  acm-certificate/
+│       ├── iam-role/  rds/  elasticache/  secrets-manager/  ssm-parameters/
+│       ├── eks-cluster/  alb/  cloudfront/
+│       └── stateful-vault/  vault/  argocd/
+├── terragrunt/                 ---- live repo half ----
+│   └── aws/
+│       ├── root.hcl            remote state + generated providers
+│       ├── _env/               env.hcl (all get_env) + config.yaml
+│       └── {bootstrap,iam,stateful,standard}/
+├── services/                   4 Node services + the static frontend
+├── k8s/                        GitOps source of truth; ArgoCD reconciles this
+├── scripts/                    build, deploy, register targets, kubeconfig
+└── verify.sh                   functional checks + drift detection
 ```
 
-## Scripts
+Each module follows one shape: `main.tf` / `variables.tf` / `versions.tf` /
+`local.tf` / `outputs.tf`, plus `docs/header.md`. Every one takes `global_config`
+and a single `<thing>_config` object, `for_each`es over a map built in locals,
+and tags with `merge(var.global_config.tags, …)`.
 
-| Script | Does |
-|---|---|
-| `scripts/rebuild-all.sh` | everything below, in order — safe to re-run; `--clean` to destroy first |
-| `scripts/build-and-push.sh` | builds 4 images, pushes to local ECR |
-| `scripts/deploy.sh` | kubeconfig, renders config, applies manifests, sets images |
-| `scripts/render-k8s-config.sh` | generates `k8s/01-config.yaml` from live outputs + Secrets Manager |
-| `scripts/register-alb-targets.sh` | registers the k3s NodePort with the ALB target group |
-| `scripts/deploy-frontend.sh` | injects the ALB DNS into the frontend, syncs to S3 |
-| `verify.sh` | 23 functional checks — round-trips, not just `describe-*` calls |
+## Vault and ArgoCD
 
-`verify.sh` deliberately does **round-trips**: it encrypts and decrypts through
-KMS, writes and reads back an S3 object, and runs a real query against
-Postgres. A `describe-*` call would pass against a stub.
+**Vault** runs as a 3-replica Raft cluster, auto-unsealed by floci's **emulated
+KMS**. The `awskms` seal calls `kms:Encrypt`/`Decrypt` from inside a pod on every
+seal and unseal, so this is a real cryptographic round-trip through the emulator,
+not a resource that merely gets created:
 
-## Gotchas
+```
+$ make vault-status
+Seal Type       awskms
+Initialized     true
+Sealed          false
+Storage Type    raft
+```
 
-Seven real bugs surfaced building this. Each is documented inline where it bites.
+![Three Vault pods on the emulated EKS cluster](docs/k8s-vault.png)
 
-**1. `count` on an unknown value.** `count = var.acm_certificate_arn != "" ? 1 : 0`
-fails because the ARN is `(known after apply)`. Gate on an input variable, not
-a resource attribute. → [`modules/alb/main.tf`](modules/alb/main.tf)
+The root token never enters Terraform state. Terraform creates an *empty*
+Secrets Manager container; `vault-init.sh` runs `operator init` and writes the
+value with `put-secret-value`, passing it via `file://` so it never appears in
+`ps` output either. `make vault-token` retrieves it.
 
-**2. The AWS provider segfaults on floci's CloudFront.** floci returns a
-`DistributionConfig` with no `OriginGroups` field; provider v6.61.0 dereferences
-it unguarded at `distribution.go:1150` and the plugin dies mid-apply, taking
-in-flight resources with it. Not fixable from Terraform — CloudFront is
-disabled locally. → [`terraform.tfvars`](terraform.tfvars)
+**ArgoCD** reconciles [`k8s/`](k8s/) from this repository:
 
-**3. ElastiCache works, but reports its endpoint somewhere else.** Only
-`CreateCacheSubnetGroup` is unsupported (`UnsupportedOperation`) — replication
-groups apply fine. The catch is that floci returns the address on
-`ConfigurationEndpoint` while real AWS puts it on
-`NodeGroups[].PrimaryEndpoint`, so `primary_endpoint_address` comes back null.
-The module coalesces both, and skips only the subnet group locally. →
-[`modules/elasticache/main.tf`](modules/elasticache/main.tf)
+```
+$ make argocd-sync
+NAME     SYNC     HEALTH    REVISION
+msdemo   Synced   Healthy   3247b464…
+```
 
-**4. Tab is IFS whitespace.** Reading `user\t\tdbname` with `IFS=$'\t' read -r a b c`
-silently collapses the empty field and shifts every value left — the database
-name landed in the password variable. Use `\x1f`. →
-[`scripts/render-k8s-config.sh`](scripts/render-k8s-config.sh)
+![The argocd namespace on the emulated EKS cluster](docs/k8s-argocd.png)
 
-**5. `COPY` preserves host file permissions.** A `0600` `server.js` on the host
-becomes unreadable inside the image once the Dockerfile drops to `USER node`.
-Use `COPY --chown --chmod`. → [`services/*/Dockerfile`](services/gateway/Dockerfile)
+That is why the manifests carry **real, committed image references** rather than
+a `PLACEHOLDER` patched in by `kubectl set image`. GitOps and imperative patching
+do not mix: Argo reverts the patch on its next sync.
 
-**6. Untagged images default to `imagePullPolicy: IfNotPresent`.** Kubernetes
-only defaults to `Always` for a literal `:latest` tag. A placeholder image name
-bakes `IfNotPresent` into the Deployment template, and `kubectl set image`
-never changes it — so every rollout silently re-ran a cached image and the fix
-for #5 appeared to do nothing. → [`k8s/10-gateway.yaml`](k8s/10-gateway.yaml)
+## Verification
 
-**7. The ALB can't reach pod IPs.** `target_type = "ip"` is correct for real
-EKS, where the AWS Load Balancer Controller registers pods directly. floci's
-ALB runs in the floci container, which has no route to k3s's `10.42.0.0/16`, so
-pod targets always report `Target.Timeout`. The workaround is a NodePort — and
-it's a workaround, not a pattern to carry to production.
+`verify.sh` does **round-trips, not `describe-*` calls**. An emulator's control
+plane will happily report a resource healthy with nothing behind it.
+
+- **KMS**: encrypt a string, decrypt it, assert the bytes match
+- **S3**: put an object, get it, `cmp` against the original
+- **Secrets Manager**: fetch, parse, name any missing keys
+- **RDS**: resolve the endpoint, TCP-probe it, run `select version()`
+- **ALB**: describe listeners, count healthy targets, drive real traffic
+
+It also detects **orphans** (live in floci, absent from state, which is what a
+crashed provider leaves behind) and **stale state** (floci restarted; state
+survived).
+
+## What floci actually is
+
+The thing that predicts nearly every behaviour: floci emulates the AWS **control
+plane** and delegates the **data plane** to real containers.
+
+```
+floci-eks-msdemo-cluster   rancher/k3s      a genuine Kubernetes API
+floci-rds-db-…             postgres:16      a genuine database
+floci-ecr-registry         registry:2       a genuine OCI registry
+```
+
+Where a container backs the service, fidelity is excellent. Where none does, you
+get a control-plane object that records your intent and does nothing.
+ElastiCache and CloudFront are the two that bite.
+
+![AWS resources](docs/aws-resources.png)
+
+- [docs/aws-resources.md](docs/aws-resources.md): every resource created, and
+  how each behaves compared with real AWS
+- [docs/floci-gaps.md](docs/floci-gaps.md): the seven places floci diverges from
+  real AWS, and which of them are dangerous
 
 ## Caveats
 
 - **floci keeps no state across restarts.** Recreating the container discards
-  everything while `terraform.tfstate` survives, leaving state describing
-  infrastructure that no longer exists. `verify.sh` detects this and tells you
-  to rebuild.
-- **RDS shows perpetual drift.** floci doesn't persist `storage_encrypted` or
-  `kms_key_id`, so every plan wants to replace the instance.
-- **The demo DB password is a throwaway.** It lives in `variables.tf` for
-  zero-setup cloning. A `check` block refuses it if `floci_endpoint` points
-  anywhere other than localhost.
+  everything while `.state/` survives on disk. `verify.sh` detects this. It also
+  orphans the previous k3s node, leaving pods stuck `Terminating`.
+- **`:latest` is a mutable tag**, so a rebuilt image doesn't change the manifest
+  and nothing restarts. `deploy.sh` issues an explicit `rollout restart`; the
+  correct fix is immutable `:git-sha` tags.
+- **The demo DB password lives in `env.hcl`** for zero-setup cloning. A `check`
+  block refuses it whenever the endpoint isn't local.
 
 ## Licence
 

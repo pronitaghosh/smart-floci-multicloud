@@ -1,0 +1,332 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3200 2743" width="3200" height="2743" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<defs><marker id="ar-BOOTSTRAP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#059669"/></marker><marker id="ar-IAM" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d97706"/></marker><marker id="ar-STATEFUL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e11d48"/></marker><marker id="ar-STANDARD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker></defs>
+<rect width="3200" height="2743" fill="#ffffff"/>
+<text x="56" y="88" font-size="54" font-weight="800" fill="#232f3e" text-anchor="start">AWS</text>
+<rect x="196" y="44" width="3" height="56" rx="0" fill="#2563eb"/>
+<text x="228" y="86" font-size="46" font-weight="800" fill="#0f172a" text-anchor="start">AWS resources created against floci</text>
+<text x="228" y="124" font-size="23" font-weight="400" fill="#2563eb" text-anchor="start">Every resource this project provisions, and how each behaves compared with real AWS.</text>
+<text x="56" y="168" font-size="20" font-weight="400" fill="#64748b" text-anchor="start">The rule that predicts almost all of it: floci emulates the AWS control plane and delegates the data plane to real containers.</text>
+<text x="56" y="196" font-size="20" font-weight="400" fill="#64748b" text-anchor="start">Where a container backs the service fidelity is high; where none does, you get an object that records your intent and does nothing.</text>
+<rect x="2682" y="40" width="470" height="96" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+<text x="2710" y="82" font-size="32" font-weight="800" fill="#0f172a" text-anchor="start">67 resources</text>
+<text x="2710" y="112" font-size="19" font-weight="400" fill="#64748b" text-anchor="start">32 distinct types  ·  4 Terragrunt stacks</text>
+<rect x="48" y="246" width="720" height="2123" rx="18" fill="#f0fdf9" stroke="#059669" stroke-width="3"/>
+<circle cx="94" cy="292" r="17" fill="#059669"/>
+<circle cx="94" cy="292" r="7" fill="#ffffff"/>
+<text x="126" y="302" font-size="32" font-weight="800" fill="#047857" text-anchor="start">BOOTSTRAP</text>
+<text x="126" y="330" font-size="19" font-weight="400" fill="#64748b" text-anchor="start">34 resources  ·  nothing exists without it</text>
+<rect x="70" y="360" width="676" height="588" rx="12" fill="#ffffff" stroke="#10b981" stroke-width="2"/>
+<text x="88" y="390" font-size="21" font-weight="700" fill="#047857" text-anchor="start">VPC &amp; NETWORKING</text>
+<text x="88" y="412" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">metadata only — no packet traverses it</text>
+<rect x="84" y="432" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="441" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="104" y="465" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_vpc</text>
+<text x="704" y="465" font-size="22" font-weight="800" fill="#047857" text-anchor="end">1</text>
+<rect x="84" y="493" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="502" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="104" y="526" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_subnet</text>
+<text x="704" y="526" font-size="22" font-weight="800" fill="#047857" text-anchor="end">4</text>
+<rect x="84" y="554" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="563" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="104" y="587" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_internet_gateway</text>
+<text x="704" y="587" font-size="22" font-weight="800" fill="#047857" text-anchor="end">1</text>
+<rect x="84" y="615" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="624" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="104" y="648" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_route_table</text>
+<text x="704" y="648" font-size="22" font-weight="800" fill="#047857" text-anchor="end">2</text>
+<rect x="84" y="676" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="685" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="104" y="709" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_route_table_association</text>
+<text x="704" y="709" font-size="22" font-weight="800" fill="#047857" text-anchor="end">4</text>
+<rect x="84" y="737" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="746" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="104" y="770" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_security_group</text>
+<text x="704" y="770" font-size="22" font-weight="800" fill="#047857" text-anchor="end">3</text>
+<text x="90" y="812" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">subnets: public-1a · public-1b · private-1a · private-1b</text>
+<text x="90" y="837" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">security groups: shared · alb · redis</text>
+<text x="90" y="862" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">EKS role tags are applied per subnet type. Rules are created</text>
+<text x="90" y="887" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">and readable; floci does not enforce them.</text>
+<text x="90" y="912" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">Real connectivity is Docker networking.</text>
+<rect x="70" y="968" width="676" height="244" rx="12" fill="#ffffff" stroke="#10b981" stroke-width="2"/>
+<text x="88" y="998" font-size="21" font-weight="700" fill="#047857" text-anchor="start">ENCRYPTION</text>
+<text x="88" y="1020" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">in-process, but a genuine round-trip</text>
+<rect x="84" y="1040" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="1049" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="104" y="1073" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_kms_key</text>
+<text x="704" y="1073" font-size="22" font-weight="800" fill="#047857" text-anchor="end">1</text>
+<rect x="84" y="1101" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="1110" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="104" y="1134" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_kms_alias</text>
+<text x="704" y="1134" font-size="22" font-weight="800" fill="#047857" text-anchor="end">1</text>
+<text x="90" y="1176" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">encrypt/decrypt verified from the host and from inside a pod</text>
+<rect x="70" y="1232" width="676" height="208" rx="12" fill="#ffffff" stroke="#10b981" stroke-width="2"/>
+<text x="88" y="1262" font-size="21" font-weight="700" fill="#047857" text-anchor="start">CONTAINER REGISTRY</text>
+<text x="88" y="1284" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">real registry:2 container</text>
+<rect x="84" y="1304" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="1313" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="104" y="1337" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_ecr_repository</text>
+<text x="704" y="1337" font-size="22" font-weight="800" fill="#047857" text-anchor="end">5</text>
+<text x="90" y="1379" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">k3s pulls from it over plain HTTP — the daemon needs it</text>
+<text x="90" y="1404" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">listed in insecure-registries</text>
+<rect x="70" y="1460" width="676" height="401" rx="12" fill="#ffffff" stroke="#10b981" stroke-width="2"/>
+<text x="88" y="1490" font-size="21" font-weight="700" fill="#047857" text-anchor="start">OBJECT STORAGE</text>
+<rect x="84" y="1506" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="1515" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="104" y="1539" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_s3_bucket</text>
+<text x="704" y="1539" font-size="22" font-weight="800" fill="#047857" text-anchor="end">1</text>
+<rect x="84" y="1567" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="1576" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="104" y="1600" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_s3_bucket_versioning</text>
+<text x="704" y="1600" font-size="22" font-weight="800" fill="#047857" text-anchor="end">1</text>
+<rect x="84" y="1628" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="1637" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="104" y="1661" font-size="16" font-weight="600" fill="#0f172a" text-anchor="start">aws_s3_bucket_server_side_encryption_configuration</text>
+<text x="704" y="1661" font-size="22" font-weight="800" fill="#047857" text-anchor="end">1</text>
+<rect x="84" y="1689" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="1698" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="104" y="1722" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_s3_bucket_public_access_block</text>
+<text x="704" y="1722" font-size="22" font-weight="800" fill="#047857" text-anchor="end">1</text>
+<rect x="84" y="1750" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="1759" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="104" y="1783" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_s3_bucket_policy</text>
+<text x="704" y="1783" font-size="22" font-weight="800" fill="#047857" text-anchor="end">1</text>
+<text x="90" y="1825" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">SSE-KMS accepted but not reported back on head-object</text>
+<rect x="70" y="1881" width="676" height="157" rx="12" fill="#ffffff" stroke="#10b981" stroke-width="2"/>
+<text x="88" y="1911" font-size="21" font-weight="700" fill="#047857" text-anchor="start">CERTIFICATES</text>
+<rect x="84" y="1927" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="1936" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="104" y="1960" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_acm_certificate</text>
+<text x="704" y="1960" font-size="22" font-weight="800" fill="#047857" text-anchor="end">1</text>
+<text x="90" y="2002" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">reports ISSUED without validation ever happening</text>
+<rect x="70" y="2058" width="676" height="157" rx="12" fill="#ffffff" stroke="#10b981" stroke-width="2"/>
+<text x="88" y="2088" font-size="21" font-weight="700" fill="#047857" text-anchor="start">PARAMETER STORE</text>
+<rect x="84" y="2104" width="648" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="84" y="2113" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="104" y="2137" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_ssm_parameter</text>
+<text x="704" y="2137" font-size="22" font-weight="800" fill="#047857" text-anchor="end">6</text>
+<text x="90" y="2179" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">/msdemo/environment · /msdemo/ecr/&lt;service&gt; ×5</text>
+<rect x="70" y="2235" width="676" height="112" rx="12" fill="#ffffff" stroke="#10b981" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="88" y="2265" font-size="20" font-weight="800" fill="#047857" text-anchor="start">CARRIED FORWARD VIA resolved:</text>
+<text x="88" y="2295" font-size="18" font-weight="400" fill="#334155" text-anchor="start">vpc_id · all_subnet_ids · public_subnet_ids</text>
+<text x="88" y="2320" font-size="18" font-weight="400" fill="#334155" text-anchor="start">private_subnet_ids · security_group_ids · kms_key_arn</text>
+<rect x="792" y="246" width="560" height="2123" rx="18" fill="#fffbeb" stroke="#d97706" stroke-width="3"/>
+<circle cx="838" cy="292" r="17" fill="#d97706"/>
+<circle cx="838" cy="292" r="7" fill="#ffffff"/>
+<text x="870" y="302" font-size="32" font-weight="800" fill="#b45309" text-anchor="start">IAM</text>
+<text x="870" y="330" font-size="19" font-weight="400" fill="#64748b" text-anchor="start">8 resources  ·  roles and policies only</text>
+<rect x="814" y="360" width="516" height="279" rx="12" fill="#ffffff" stroke="#f59e0b" stroke-width="2"/>
+<text x="832" y="390" font-size="21" font-weight="700" fill="#b45309" text-anchor="start">IDENTITY &amp; ACCESS</text>
+<rect x="828" y="406" width="488" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="828" y="415" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="848" y="439" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_iam_role</text>
+<text x="1288" y="439" font-size="22" font-weight="800" fill="#b45309" text-anchor="end">3</text>
+<rect x="828" y="467" width="488" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="828" y="476" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="848" y="500" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_iam_role_policy</text>
+<text x="1288" y="500" font-size="22" font-weight="800" fill="#b45309" text-anchor="end">1</text>
+<rect x="828" y="528" width="488" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="828" y="537" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="848" y="561" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_iam_role_policy_attachment</text>
+<text x="1288" y="561" font-size="22" font-weight="800" fill="#b45309" text-anchor="end">4</text>
+<text x="834" y="603" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">cluster-role · node-role · app-role</text>
+<rect x="814" y="659" width="516" height="87" rx="12" fill="#ffffff" stroke="#f59e0b" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="832" y="689" font-size="20" font-weight="800" fill="#b45309" text-anchor="start">CARRIED FORWARD VIA resolved:</text>
+<text x="832" y="719" font-size="18" font-weight="400" fill="#334155" text-anchor="start">role_arns</text>
+<rect x="814" y="766" width="516" height="262" rx="12" fill="#ffffff" stroke="#d97706" stroke-width="2.5"/>
+<text x="832" y="796" font-size="20" font-weight="800" fill="#b45309" text-anchor="start">NOT ENFORCED</text>
+<text x="832" y="826" font-size="18" font-weight="400" fill="#334155" text-anchor="start">Roles, policies and attachments are all created</text>
+<text x="832" y="851" font-size="18" font-weight="400" fill="#334155" text-anchor="start">and readable. Nothing evaluates them: every</text>
+<text x="832" y="876" font-size="18" font-weight="400" fill="#334155" text-anchor="start">call in this project uses test/test credentials</text>
+<text x="832" y="901" font-size="18" font-weight="400" fill="#334155" text-anchor="start">and succeeds regardless of policy.</text>
+<text x="832" y="926" font-size="18" font-weight="400" fill="#334155" text-anchor="start"></text>
+<text x="832" y="951" font-size="18" font-weight="400" fill="#334155" text-anchor="start">An over-permissive policy and a correct one are</text>
+<text x="832" y="976" font-size="18" font-weight="400" fill="#334155" text-anchor="start">indistinguishable here. IAM is a modelling</text>
+<text x="832" y="1001" font-size="18" font-weight="400" fill="#334155" text-anchor="start">exercise, not an authorization one.</text>
+<rect x="1368" y="246" width="656" height="2123" rx="18" fill="#fff1f3" stroke="#e11d48" stroke-width="3"/>
+<circle cx="1414" cy="292" r="17" fill="#e11d48"/>
+<circle cx="1414" cy="292" r="7" fill="#ffffff"/>
+<text x="1446" y="302" font-size="32" font-weight="800" fill="#be123c" text-anchor="start">STATEFUL</text>
+<text x="1446" y="330" font-size="19" font-weight="400" fill="#64748b" text-anchor="start">11 resources  ·  data-bearing</text>
+<rect x="1390" y="360" width="612" height="294" rx="12" fill="#ffffff" stroke="#f43f5e" stroke-width="2"/>
+<text x="1408" y="390" font-size="21" font-weight="700" fill="#be123c" text-anchor="start">RDS</text>
+<text x="1408" y="412" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">real postgres:16 container</text>
+<rect x="1404" y="432" width="584" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="1404" y="441" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="1424" y="465" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_db_instance</text>
+<text x="1960" y="465" font-size="22" font-weight="800" fill="#be123c" text-anchor="end">1</text>
+<rect x="1404" y="493" width="584" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="1404" y="502" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="1424" y="526" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_db_subnet_group</text>
+<text x="1960" y="526" font-size="22" font-weight="800" fill="#be123c" text-anchor="end">1</text>
+<text x="1410" y="568" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">real SQL, real persistence</text>
+<text x="1410" y="593" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">storage_encrypted and kms_key_id are accepted and read</text>
+<text x="1410" y="618" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">back unset, so every plan wants to replace the database</text>
+<rect x="1390" y="674" width="612" height="208" rx="12" fill="#ffffff" stroke="#f43f5e" stroke-width="2"/>
+<text x="1408" y="704" font-size="21" font-weight="700" fill="#be123c" text-anchor="start">ELASTICACHE</text>
+<text x="1408" y="726" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">no container behind it</text>
+<rect x="1404" y="746" width="584" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="1404" y="755" width="6" height="34" rx="3" fill="#ef4444"/>
+<text x="1424" y="779" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_elasticache_replication_group</text>
+<text x="1960" y="779" font-size="22" font-weight="800" fill="#be123c" text-anchor="end">1</text>
+<text x="1410" y="821" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">reports available; the endpoint is the string “localhost”</text>
+<text x="1410" y="846" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">unreachable from a pod — caching is disabled in the demo</text>
+<rect x="1390" y="902" width="612" height="243" rx="12" fill="#ffffff" stroke="#f43f5e" stroke-width="2"/>
+<text x="1408" y="932" font-size="21" font-weight="700" fill="#be123c" text-anchor="start">SECRETS MANAGER</text>
+<rect x="1404" y="948" width="584" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="1404" y="957" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="1424" y="981" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_secretsmanager_secret</text>
+<text x="1960" y="981" font-size="22" font-weight="800" fill="#be123c" text-anchor="end">4</text>
+<rect x="1404" y="1009" width="584" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="1404" y="1018" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="1424" y="1042" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_secretsmanager_secret_version</text>
+<text x="1960" y="1042" font-size="22" font-weight="800" fill="#be123c" text-anchor="end">2</text>
+<text x="1410" y="1084" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">app-credentials · argocd-admin · vault root token</text>
+<text x="1410" y="1109" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">and recovery keys</text>
+<rect x="1390" y="1165" width="612" height="269" rx="12" fill="#ffffff" stroke="#f43f5e" stroke-width="2"/>
+<text x="1408" y="1195" font-size="21" font-weight="700" fill="#be123c" text-anchor="start">ENCRYPTION</text>
+<text x="1408" y="1217" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">vault prerequisites, the AWS half</text>
+<rect x="1404" y="1237" width="584" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="1404" y="1246" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="1424" y="1270" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_kms_key</text>
+<text x="1960" y="1270" font-size="22" font-weight="800" fill="#be123c" text-anchor="end">1</text>
+<rect x="1404" y="1298" width="584" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="1404" y="1307" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="1424" y="1331" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_kms_alias</text>
+<text x="1960" y="1331" font-size="22" font-weight="800" fill="#be123c" text-anchor="end">1</text>
+<text x="1410" y="1373" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">auto-unseal key — Vault calls Encrypt/Decrypt on it at</text>
+<text x="1410" y="1398" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">every seal and unseal</text>
+<rect x="1390" y="1454" width="612" height="137" rx="12" fill="#ffffff" stroke="#f43f5e" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="1408" y="1484" font-size="20" font-weight="800" fill="#be123c" text-anchor="start">CARRIED FORWARD VIA resolved:</text>
+<text x="1408" y="1514" font-size="18" font-weight="400" fill="#334155" text-anchor="start">vault_unseal_key_ids</text>
+<text x="1408" y="1539" font-size="18" font-weight="400" fill="#334155" text-anchor="start">vault_root_token_secrets</text>
+<text x="1408" y="1564" font-size="18" font-weight="400" fill="#334155" text-anchor="start">vault_recovery_key_secrets</text>
+<rect x="2040" y="246" width="1112" height="2123" rx="18" fill="#eff6ff" stroke="#2563eb" stroke-width="3"/>
+<circle cx="2086" cy="292" r="17" fill="#2563eb"/>
+<circle cx="2086" cy="292" r="7" fill="#ffffff"/>
+<text x="2118" y="302" font-size="32" font-weight="800" fill="#1d4ed8" text-anchor="start">STANDARD</text>
+<text x="2118" y="330" font-size="19" font-weight="400" fill="#64748b" text-anchor="start">14 resources  ·  everything needing the layers below</text>
+<rect x="2062" y="360" width="1068" height="269" rx="12" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/>
+<text x="2080" y="390" font-size="21" font-weight="700" fill="#1d4ed8" text-anchor="start">EKS</text>
+<text x="2080" y="412" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">real rancher/k3s container</text>
+<rect x="2076" y="432" width="1040" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="2076" y="441" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="2096" y="465" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_eks_cluster</text>
+<text x="3088" y="465" font-size="22" font-weight="800" fill="#1d4ed8" text-anchor="end">1</text>
+<rect x="2076" y="493" width="1040" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="2076" y="502" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="2096" y="526" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_eks_node_group</text>
+<text x="3088" y="526" font-size="22" font-weight="800" fill="#1d4ed8" text-anchor="end">1</text>
+<text x="2082" y="568" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">a genuine Kubernetes API — aws eks get-token works against it, because floci wires a token-auth webhook into the apiserver</text>
+<text x="2082" y="593" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">the node group is metadata only: the node IS the k3s container, so desired_size does nothing and there is no autoscaling</text>
+<rect x="2062" y="649" width="1068" height="305" rx="12" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/>
+<text x="2080" y="679" font-size="21" font-weight="700" fill="#1d4ed8" text-anchor="start">PLATFORM TOOLING</text>
+<text x="2080" y="701" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">workloads managed by Terraform</text>
+<rect x="2076" y="721" width="1040" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="2076" y="730" width="6" height="34" rx="3" fill="#a855f7"/>
+<text x="2096" y="754" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">helm_release</text>
+<text x="3088" y="754" font-size="22" font-weight="800" fill="#1d4ed8" text-anchor="end">3</text>
+<rect x="2076" y="782" width="1040" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="2076" y="791" width="6" height="34" rx="3" fill="#a855f7"/>
+<text x="2096" y="815" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">kubernetes_namespace</text>
+<text x="3088" y="815" font-size="22" font-weight="800" fill="#1d4ed8" text-anchor="end">2</text>
+<rect x="2076" y="843" width="1040" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="2076" y="852" width="6" height="34" rx="3" fill="#a855f7"/>
+<text x="2096" y="876" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">null_resource</text>
+<text x="3088" y="876" font-size="22" font-weight="800" fill="#1d4ed8" text-anchor="end">2</text>
+<text x="2082" y="918" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">vault · argocd · argocd-apps</text>
+<rect x="2062" y="974" width="526" height="162" rx="12" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/>
+<text x="2080" y="1004" font-size="21" font-weight="700" fill="#1d4ed8" text-anchor="start">Vault</text>
+<text x="2080" y="1034" font-size="18" font-weight="400" fill="#334155" text-anchor="start">3× Raft, auto-unsealed by KMS</text>
+<text x="2080" y="1059" font-size="18" font-weight="400" fill="#334155" text-anchor="start">root token → Secrets Manager</text>
+<text x="2080" y="1084" font-size="18" font-weight="400" fill="#334155" text-anchor="start">never enters terraform state</text>
+<text x="2080" y="1109" font-size="18" font-weight="400" fill="#334155" text-anchor="start">Sealed: false</text>
+<rect x="2604" y="974" width="526" height="162" rx="12" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/>
+<text x="2622" y="1004" font-size="21" font-weight="700" fill="#1d4ed8" text-anchor="start">ArgoCD</text>
+<text x="2622" y="1034" font-size="18" font-weight="400" fill="#334155" text-anchor="start">reconciles k8s/ from git</text>
+<text x="2622" y="1059" font-size="18" font-weight="400" fill="#334155" text-anchor="start">owns the 4 Deployments</text>
+<text x="2622" y="1084" font-size="18" font-weight="400" fill="#334155" text-anchor="start">real committed image refs</text>
+<text x="2622" y="1109" font-size="18" font-weight="400" fill="#334155" text-anchor="start">Synced / Healthy</text>
+<rect x="2062" y="1156" width="1068" height="137" rx="12" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/>
+<text x="2080" y="1186" font-size="20" font-weight="800" fill="#1d4ed8" text-anchor="start">APPLICATION</text>
+<text x="2080" y="1216" font-size="18" font-weight="400" fill="#334155" text-anchor="start">gateway :4000  ·  user-service :4001  ·  order-service :4002  ·  payment-service :4003</text>
+<text x="2080" y="1241" font-size="18" font-weight="400" fill="#334155" text-anchor="start">2 replicas each · real traffic · real SQL · service-to-service HTTP</text>
+<text x="2080" y="1266" font-size="18" font-weight="400" fill="#334155" text-anchor="start">pod network 10.42.0.0/16 — the ALB has no route here</text>
+<rect x="2062" y="1313" width="1068" height="330" rx="12" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/>
+<text x="2080" y="1343" font-size="21" font-weight="700" fill="#1d4ed8" text-anchor="start">LOAD BALANCING</text>
+<text x="2080" y="1365" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">HTTP proxy inside the floci container</text>
+<rect x="2076" y="1385" width="1040" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="2076" y="1394" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="2096" y="1418" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_lb</text>
+<text x="3088" y="1418" font-size="22" font-weight="800" fill="#1d4ed8" text-anchor="end">1</text>
+<rect x="2076" y="1446" width="1040" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="2076" y="1455" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="2096" y="1479" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_lb_target_group</text>
+<text x="3088" y="1479" font-size="22" font-weight="800" fill="#1d4ed8" text-anchor="end">1</text>
+<rect x="2076" y="1507" width="1040" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="2076" y="1516" width="6" height="34" rx="3" fill="#f59e0b"/>
+<text x="2096" y="1540" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_lb_listener</text>
+<text x="3088" y="1540" font-size="22" font-weight="800" fill="#1d4ed8" text-anchor="end">2</text>
+<text x="2082" y="1582" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">really proxies HTTP to registered targets, health checks included</text>
+<text x="2082" y="1607" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">target_type = ip is correct for real EKS, but floci cannot reach pods — the demo registers a NodePort instead</text>
+<rect x="2062" y="1663" width="1068" height="157" rx="12" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/>
+<text x="2080" y="1693" font-size="21" font-weight="700" fill="#1d4ed8" text-anchor="start">PARAMETER STORE</text>
+<rect x="2076" y="1709" width="1040" height="52" rx="9" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<rect x="2076" y="1718" width="6" height="34" rx="3" fill="#14b8a6"/>
+<text x="2096" y="1742" font-size="21" font-weight="600" fill="#0f172a" text-anchor="start">aws_ssm_parameter</text>
+<text x="3088" y="1742" font-size="22" font-weight="800" fill="#1d4ed8" text-anchor="end">1</text>
+<text x="2082" y="1784" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">/msdemo/gateway_url</text>
+<rect x="2062" y="1840" width="1068" height="187" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+<text x="2080" y="1870" font-size="20" font-weight="800" fill="#1d4ed8" text-anchor="start">aws_cloudfront_* — DEFINED BUT DISABLED LOCALLY</text>
+<text x="2080" y="1900" font-size="18" font-weight="400" fill="#334155" text-anchor="start">aws_cloudfront_distribution · aws_cloudfront_origin_access_control</text>
+<text x="2080" y="1925" font-size="18" font-weight="400" fill="#334155" text-anchor="start"></text>
+<text x="2080" y="1950" font-size="18" font-weight="400" fill="#334155" text-anchor="start">The AWS provider segfaults reading floci's response. GetDistribution omits</text>
+<text x="2080" y="1975" font-size="18" font-weight="400" fill="#334155" text-anchor="start">OriginGroups; provider v6.61.0 dereferences it unguarded (distribution.go:1150)</text>
+<text x="2080" y="2000" font-size="18" font-weight="400" fill="#334155" text-anchor="start">and takes unrelated in-flight resources down with it, orphaning them from state.</text>
+<rect x="48" y="2403" width="3104" height="152" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+<text x="76" y="2447" font-size="21" font-weight="800" fill="#0f172a" text-anchor="start">CROSS-STACK FLOW</text>
+<text x="76" y="2479" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">values move through a resolved: block folded</text>
+<text x="76" y="2503" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">into the YAML config — never through</text>
+<text x="76" y="2527" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">terraform_remote_state</text>
+<rect x="560" y="2478" width="240" height="50" rx="10" fill="#ffffff" stroke="#059669" stroke-width="2.5"/>
+<text x="680" y="2511" font-size="19" font-weight="800" fill="#047857" text-anchor="middle">BOOTSTRAP</text>
+<rect x="1050" y="2478" width="240" height="50" rx="10" fill="#ffffff" stroke="#e11d48" stroke-width="2.5"/>
+<text x="1170" y="2511" font-size="19" font-weight="800" fill="#be123c" text-anchor="middle">STATEFUL</text>
+<line x1="816" y1="2503" x2="1034" y2="2503" stroke="#059669" stroke-width="2.5" marker-end="url(#ar-BOOTSTRAP)"/>
+<text x="925" y="2442" font-size="15" font-weight="400" fill="#64748b" text-anchor="middle">vpc_id · subnet_ids</text>
+<text x="925" y="2462" font-size="15" font-weight="400" fill="#64748b" text-anchor="middle">security_group_ids · kms_key_arns</text>
+<rect x="1346" y="2478" width="240" height="50" rx="10" fill="#ffffff" stroke="#d97706" stroke-width="2.5"/>
+<text x="1466" y="2511" font-size="19" font-weight="800" fill="#b45309" text-anchor="middle">IAM</text>
+<rect x="1836" y="2478" width="240" height="50" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+<text x="1956" y="2511" font-size="19" font-weight="800" fill="#1d4ed8" text-anchor="middle">STANDARD</text>
+<line x1="1602" y1="2503" x2="1820" y2="2503" stroke="#d97706" stroke-width="2.5" marker-end="url(#ar-IAM)"/>
+<text x="1711" y="2462" font-size="15" font-weight="400" fill="#64748b" text-anchor="middle">role_arns</text>
+<rect x="2132" y="2478" width="240" height="50" rx="10" fill="#ffffff" stroke="#e11d48" stroke-width="2.5"/>
+<text x="2252" y="2511" font-size="19" font-weight="800" fill="#be123c" text-anchor="middle">STATEFUL</text>
+<rect x="2622" y="2478" width="240" height="50" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+<text x="2742" y="2511" font-size="19" font-weight="800" fill="#1d4ed8" text-anchor="middle">STANDARD</text>
+<line x1="2388" y1="2503" x2="2606" y2="2503" stroke="#e11d48" stroke-width="2.5" marker-end="url(#ar-STATEFUL)"/>
+<text x="2497" y="2442" font-size="15" font-weight="400" fill="#64748b" text-anchor="middle">vault_unseal_key_ids</text>
+<text x="2497" y="2462" font-size="15" font-weight="400" fill="#64748b" text-anchor="middle">vault_root_token_secrets</text>
+<rect x="48" y="2575" width="3104" height="128" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+<text x="76" y="2617" font-size="21" font-weight="800" fill="#0f172a" text-anchor="start">FIDELITY</text>
+<rect x="230" y="2599" width="9" height="22" rx="4" fill="#14b8a6"/>
+<text x="252" y="2617" font-size="18" font-weight="400" fill="#334155" text-anchor="start">real container behind it — high fidelity</text>
+<rect x="642" y="2599" width="9" height="22" rx="4" fill="#f59e0b"/>
+<text x="664" y="2617" font-size="18" font-weight="400" fill="#334155" text-anchor="start">in-process emulation — works, deviations noted</text>
+<rect x="1110" y="2599" width="9" height="22" rx="4" fill="#ef4444"/>
+<text x="1132" y="2617" font-size="18" font-weight="400" fill="#334155" text-anchor="start">no data plane — unusable or misleading</text>
+<rect x="1503" y="2599" width="9" height="22" rx="4" fill="#a855f7"/>
+<text x="1525" y="2617" font-size="18" font-weight="400" fill="#334155" text-anchor="start">platform tooling via Helm, not AWS</text>
+<text x="76" y="2659" font-size="21" font-weight="800" fill="#0f172a" text-anchor="start">BEHAVIOUR</text>
+<rect x="230" y="2641" width="9" height="22" rx="4" fill="#14b8a6"/>
+<text x="252" y="2659" font-size="18" font-weight="800" fill="#0f172a" text-anchor="start">Faithful:</text>
+<text x="346" y="2659" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">EKS · ECR · KMS · Secrets Manager · SSM</text>
+<rect x="746" y="2641" width="9" height="22" rx="4" fill="#f59e0b"/>
+<text x="768" y="2659" font-size="18" font-weight="800" fill="#0f172a" text-anchor="start">Partial:</text>
+<text x="852" y="2659" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">RDS · S3 · IAM · ALB · ACM · VPC metadata</text>
+<rect x="1271" y="2641" width="9" height="22" rx="4" fill="#ef4444"/>
+<text x="1293" y="2659" font-size="18" font-weight="800" fill="#0f172a" text-anchor="start">Broken:</text>
+<text x="1366" y="2659" font-size="18" font-weight="400" fill="#64748b" text-anchor="start">ElastiCache · CloudFront</text>
+<text x="3124" y="2659" font-size="18" font-weight="400" fill="#64748b" text-anchor="end">github.com/elokac/floci-aws-demo</text>
+<text x="3124" y="2617" font-size="18" font-weight="400" fill="#64748b" text-anchor="end">Counts, colours and flows describe the stack as applied.</text>
+</svg>

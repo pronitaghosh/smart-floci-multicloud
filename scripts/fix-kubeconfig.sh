@@ -24,7 +24,7 @@
 set -euo pipefail
 
 KUBECONFIG_PATH="${KUBECONFIG:-$HOME/.kube/config}"
-CLUSTER_NAME="${1:-msdemo-cluster}"
+CLUSTER_NAME="${1:-smartcloud-cluster}"
 
 AWS_KEY="${AWS_ACCESS_KEY_ID:-test}"
 AWS_SECRET="${AWS_SECRET_ACCESS_KEY:-test}"

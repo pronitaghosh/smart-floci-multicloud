@@ -1,12 +1,12 @@
 #------------------------------------------------------------------
-# msdemo — base configuration
+# smartcloud — base configuration
 #------------------------------------------------------------------
 # The single input for every stack. Correct for REAL AWS as written; the
 # global.floci_compat switch below is the entire local-emulator surface.
 #------------------------------------------------------------------
 
 global:
-  client_name: msdemo
+  client_name: smartcloud
   environment: dev
   region: us-east-1
   default_az: us-east-1a
@@ -22,10 +22,10 @@ global:
 
   # Where pods reach the emulated AWS API. A pod's localhost is its own
   # loopback, so this is floci's address on the docker network.
-  in_cluster_endpoint_url: http://172.18.0.2:4566
+  in_cluster_endpoint_url: http://localhost:4566
   tags:
     Owner: eloka
-    Project: msdemo
+    Project: smartcloud
     Purpose: floci-demo
   provider_aliases:
     us_east_1:
@@ -37,7 +37,7 @@ global:
 #------------------------------------------------------------------
 
 network:
-  name: msdemo
+  name: smartcloud
   cidr: 10.20.0.0/16
   enable_dns_support: true
   enable_dns_hostnames: true
@@ -63,7 +63,7 @@ network:
 
 kms_keys:
   - name: key
-    description: "msdemo demo encryption key"
+    description: "smartcloud demo encryption key"
     deletion_window_in_days: 7
     enable_key_rotation: true
 
@@ -75,36 +75,36 @@ ecr_repositories:
   - { name: payment-service }
 
 buckets:
-  - name: msdemo-frontend-static
+  - name: smartcloud-frontend-static
     versioning: Enabled
     kms_key_name: key
     block_public_access: true
     allow_cloudfront_read: true
 
 acm_certificates:
-  - { name: alb, domain_name: msdemo.local, validation_method: DNS }
+  - { name: alb, domain_name: smartcloud.local, validation_method: DNS }
 
 #------------------------------------------------------------------
 # Stack: iam
 #------------------------------------------------------------------
 
 iam_roles:
-  - name: msdemo-cluster-cluster-role
+  - name: smartcloud-cluster-cluster-role
     trusted_service: eks.amazonaws.com
     managed_policy_arns:
       - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
 
-  - name: msdemo-cluster-node-role
+  - name: smartcloud-cluster-node-role
     trusted_service: ec2.amazonaws.com
     managed_policy_arns:
       - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
       - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
       - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
 
-  - name: msdemo-cluster-app-role
+  - name: smartcloud-cluster-app-role
     trusted_service: ec2.amazonaws.com
     inline_policies:
-      - name: msdemo-cluster-app-secrets-ssm-s3
+      - name: smartcloud-cluster-app-secrets-ssm-s3
         statements:
           - { actions: ["secretsmanager:GetSecretValue"] }
           - { actions: ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"] }
@@ -120,8 +120,8 @@ rds_instances:
     engine_version: "16"
     instance_class: db.t3.micro
     allocated_storage: 20
-    db_name: msdemo
-    username: msdemo_admin
+    db_name: smartcloud
+    username: smartcloud_admin
     password: "__DB_PASSWORD__"
     storage_encrypted: true
     kms_key_name: key
@@ -134,14 +134,14 @@ elasticache_clusters:
     node_type: cache.t3.micro
     num_cache_clusters: 1
     port: 6379
-    description: "msdemo caching layer"
+    description: "smartcloud caching layer"
     create_subnet_group: true
 
 vault_static:
   # The AWS half of Vault: an auto-unseal key and the secret containers its
   # root token lands in. Vault calls kms:Encrypt/Decrypt on every seal and
   # unseal, so this genuinely exercises the emulated KMS.
-  - name: msdemo
+  - name: smartcloud
     unseal_key_deletion_window: 7
     store_root_token: true
     store_recovery_keys: true
@@ -149,14 +149,14 @@ vault_static:
 secrets:
   # Values are assembled by composite-stateful from this stack's own outputs —
   # the RDS endpoint and Redis endpoint are not known until apply time.
-  - name: msdemo/app-credentials
+  - name: smartcloud/app-credentials
     description: "Application database and cache credentials"
     kms_key_name: key
     values: {}
 
   # Container only. The platform stack writes the real value with
   # put-secret-value once ArgoCD has generated it.
-  - name: msdemo/argocd-admin
+  - name: smartcloud/argocd-admin
     description: "ArgoCD initial admin password"
     kms_key_name: key
     values: {}
@@ -166,23 +166,23 @@ secrets:
 #------------------------------------------------------------------
 
 clusters:
-  - name: msdemo-cluster
+  - name: smartcloud-cluster
     kubernetes_version: "1.29"
-    cluster_role_name: msdemo-cluster-cluster-role
+    cluster_role_name: smartcloud-cluster-cluster-role
     node_groups:
-      - name: msdemo-cluster-ng
-        node_role_name: msdemo-cluster-node-role
+      - name: smartcloud-cluster-ng
+        node_role_name: smartcloud-cluster-node-role
         instance_types: [t3.medium]
         desired_size: 2
         min_size: 1
         max_size: 3
 
 load_balancers:
-  - name: msdemo-alb
+  - name: smartcloud-alb
     internal: false
     target_groups:
       # scripts/register-alb-targets.sh looks this name up verbatim.
-      - name: msdemo-gateway-tg
+      - name: smartcloud-gateway-tg
         port: 80
         protocol: HTTP
         target_type: ip
@@ -193,15 +193,15 @@ load_balancers:
           interval: 15
           timeout: 5
     listeners:
-      - { port: 80, protocol: HTTP, default_target_group: msdemo-gateway-tg }
-      - { port: 443, protocol: HTTPS, default_target_group: msdemo-gateway-tg, certificate_name: alb }
+      - { port: 80, protocol: HTTP, default_target_group: smartcloud-gateway-tg }
+      - { port: 443, protocol: HTTPS, default_target_group: smartcloud-gateway-tg, certificate_name: alb }
 
 cloudfront_distributions:
   - name: frontend
-    bucket_name: msdemo-frontend-static
-    aliases: [msdemo.local]
+    bucket_name: smartcloud-frontend-static
+    aliases: [smartcloud.local]
     default_root_object: index.html
-    comment: "msdemo frontend distribution"
+    comment: "smartcloud frontend distribution"
     certificate_name: frontend
     certificate_provider_alias: us_east_1
 
@@ -212,7 +212,7 @@ cloudfront_distributions:
 #------------------------------------------------------------------
 
 vault:
-  - name: msdemo
+  - name: smartcloud
     namespace: vault
     chart_version: "0.29.1"
     # Single-node k3s: 3 replicas would leave two Pending, so the chart's
@@ -236,8 +236,8 @@ argocd:
     repo_url: https://github.com/elokac/floci-aws-demo.git
     target_revision: main
     path: k8s
-    destination_namespace: msdemo
+    destination_namespace: smartcloud
     auto_sync: true
     self_heal: true
     prune: false
-    admin_password_secret_name: msdemo/argocd-admin
+    admin_password_secret_name: smartcloud/argocd-admin

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Functional verification of the msdemo stack against floci.
+# Functional verification of the smartcloud stack against floci.
 #
 # This does round-trips (write then read back) rather than just listing
 # resources, so a PASS means the service actually works, not just that the
@@ -14,7 +14,7 @@ export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
 E=${E:-http://localhost:4566}
 aws() { command aws --endpoint-url "$E" "$@"; }
 
-PROJECT=msdemo
+PROJECT=smartcloud
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 

@@ -13,7 +13,7 @@ export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-test}"
 export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-1}"
 
 # Do NOT guess the pod name. The chart's fullname is <release>-<chart>, so a
-# release called "msdemo" produces "msdemo-vault-0" -- not "msdemo-0". Getting
+# release called "smartcloud" produces "smartcloud-vault-0" -- not "smartcloud-0". Getting
 # this wrong makes every kubectl exec fail silently.
 STS=$(kubectl get statefulset -n "$NAMESPACE" \
   -l "app.kubernetes.io/instance=$RELEASE,app.kubernetes.io/name=vault" \

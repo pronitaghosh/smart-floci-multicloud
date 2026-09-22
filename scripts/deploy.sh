@@ -48,8 +48,8 @@ echo "=== Applying manifests ==="
 kubectl apply -f k8s/00-namespace.yaml
 kubectl apply -f k8s/01-config.yaml
 
-if kubectl get application -n argocd msdemo >/dev/null 2>&1; then
-  SYNC=$(kubectl get application -n argocd msdemo \
+if kubectl get application -n argocd smartcloud >/dev/null 2>&1; then
+  SYNC=$(kubectl get application -n argocd smartcloud \
     -o jsonpath='{.status.sync.status}' 2>/dev/null || echo "")
   if [ "$SYNC" = "Synced" ]; then
     echo "  ArgoCD reports Synced -- leaving the workloads to it."
@@ -68,14 +68,14 @@ fi
 # explicitly is the honest price of a mutable tag. It also re-reads the
 # ConfigMap, which envFrom only injects at pod start.
 echo "=== Restarting deployments to pick up :latest and current config ==="
-kubectl rollout restart deployment -n msdemo >/dev/null 2>&1 || true
+kubectl rollout restart deployment -n smartcloud >/dev/null 2>&1 || true
 
 echo "=== Waiting for rollout ==="
 for svc in gateway user-service order-service payment-service; do
-  kubectl rollout status "deployment/$svc" -n msdemo --timeout=180s || true
+  kubectl rollout status "deployment/$svc" -n smartcloud --timeout=180s || true
 done
 
-kubectl get pods -n msdemo
+kubectl get pods -n smartcloud
 
 echo ""
 echo "Next: ./scripts/register-alb-targets.sh   (points the ALB at the gateway NodePort)"

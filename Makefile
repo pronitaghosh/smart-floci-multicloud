@@ -10,7 +10,7 @@ SHELL := /bin/bash
 
 TG_DIR          ?= terragrunt/aws
 STACKS          ?= bootstrap iam stateful standard
-CLIENT_NAME     ?= msdemo
+CLIENT_NAME     ?= smartcloud
 ENVIRONMENT_NAME?= dev
 FLOCI_ENDPOINT  ?= http://localhost:4566
 
@@ -121,8 +121,8 @@ frontend: ## Inject the ALB DNS into the frontend and sync to S3
 	@./scripts/deploy-frontend.sh
 
 restart: ## Restart the workloads (picks up a new :latest image and ConfigMap)
-	@kubectl rollout restart deployment -n msdemo
-	@kubectl rollout status deployment/order-service -n msdemo --timeout=120s
+	@kubectl rollout restart deployment -n smartcloud
+	@kubectl rollout status deployment/order-service -n smartcloud --timeout=120s
 
 verify: ## Run the functional verification suite
 	@./verify.sh
@@ -142,7 +142,7 @@ vault-status: ## Show Vault's seal status
 
 vault-token: ## Print the Vault root token from Secrets Manager
 	@aws --endpoint-url $(FLOCI_ENDPOINT) secretsmanager get-secret-value \
-		--secret-id msdemo-vault-root-token --query SecretString --output text
+		--secret-id smartcloud-vault-root-token --query SecretString --output text
 
 vault-ui: ## Port-forward the Vault UI to localhost:8200
 	@svc=$$(kubectl get svc -n vault -l app.kubernetes.io/name=vault \
@@ -151,18 +151,18 @@ vault-ui: ## Port-forward the Vault UI to localhost:8200
 	echo "http://localhost:8200"; kubectl port-forward -n vault "svc/$$svc" 8200:8200
 
 argocd-sync: ## Show the ArgoCD application status
-	@kubectl get application -n argocd msdemo \
+	@kubectl get application -n argocd smartcloud \
 		-o custom-columns=NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status,REVISION:.status.sync.revision \
 		2>/dev/null || echo "  no Application yet -- has 'make apply STACK=standard' run?"
 
 argocd-refresh: ## Force ArgoCD to re-read git and reconcile now
-	@kubectl -n argocd annotate application msdemo \
+	@kubectl -n argocd annotate application smartcloud \
 		argocd.argoproj.io/refresh=hard --overwrite >/dev/null
 	@echo "refresh requested; watch with: make argocd-sync"
 
 argocd-password: ## Print the ArgoCD admin password from Secrets Manager
 	@aws --endpoint-url $(FLOCI_ENDPOINT) secretsmanager get-secret-value \
-		--secret-id msdemo/argocd-admin --query SecretString --output text
+		--secret-id smartcloud/argocd-admin --query SecretString --output text
 
 argocd-ui: ## Port-forward the ArgoCD UI to localhost:8080
 	@svc=$$(kubectl get svc -n argocd -l app.kubernetes.io/name=argocd-server \

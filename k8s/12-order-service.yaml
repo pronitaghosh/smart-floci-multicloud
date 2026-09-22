@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: order-service
-  namespace: msdemo
+  namespace: smartcloud
 spec:
   replicas: 2
   selector:
@@ -15,15 +15,15 @@ spec:
     spec:
       containers:
         - name: order-service
-          image: 000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/order-service:latest
+          image: 000000000000.dkr.ecr.us-east-1.localhost:5100/smartcloud/order-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 4002
           envFrom:
             - configMapRef:
-                name: msdemo-config
+                name: smartcloud-config
             - secretRef:
-                name: msdemo-db-secret
+                name: smartcloud-db-secret
           env:
             - name: PORT
               value: "4002"
@@ -38,7 +38,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: order-service
-  namespace: msdemo
+  namespace: smartcloud
 spec:
   selector:
     app: order-service

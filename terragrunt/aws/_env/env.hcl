@@ -10,7 +10,7 @@ locals {
   #------------------------------------------------------------------
   # Identity
   #------------------------------------------------------------------
-  client_name      = get_env("CLIENT_NAME", "msdemo")
+  client_name      = get_env("CLIENT_NAME", "smartcloud")
   environment_name = get_env("ENVIRONMENT_NAME", "dev")
 
   #------------------------------------------------------------------

@@ -27,6 +27,6 @@ variable "ssm_config" {
     tags   = optional(map(string), {})
   }))
 
-  description = "SSM parameters. Names are absolute paths, e.g. /msdemo/gateway_url"
+  description = "SSM parameters. Names are absolute paths, e.g. /smartcloud/gateway_url"
   default     = []
 }

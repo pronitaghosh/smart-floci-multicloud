@@ -7,7 +7,7 @@
 #    in afterwards by `kubectl set image`. GitOps and imperative patching are
 #    incompatible -- Argo reverts the patch on the next sync. This is possible
 #    because floci's ECR registry address is deterministic:
-#      000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/<service>
+#      000000000000.dkr.ecr.us-east-1.localhost:5100/smartcloud/<service>
 #    Against real AWS the account ID and region would come from the outputs,
 #    so `images:` below is what a CI job would rewrite on each release.
 #
@@ -20,7 +20,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: msdemo
+namespace: smartcloud
 
 resources:
   - 00-namespace.yaml
@@ -32,11 +32,11 @@ resources:
 # Overriding here rather than editing each Deployment keeps the tag in one
 # place -- this is the line a release pipeline bumps.
 images:
-  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/gateway
+  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/smartcloud/gateway
     newTag: latest
-  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/user-service
+  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/smartcloud/user-service
     newTag: latest
-  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/order-service
+  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/smartcloud/order-service
     newTag: latest
-  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/msdemo/payment-service
+  - name: 000000000000.dkr.ecr.us-east-1.localhost:5100/smartcloud/payment-service
     newTag: latest

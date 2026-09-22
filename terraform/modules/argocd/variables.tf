@@ -31,7 +31,7 @@ variable "argocd_config" {
     target_revision = optional(string, "main")
     path            = optional(string, "k8s")
 
-    destination_namespace = optional(string, "msdemo")
+    destination_namespace = optional(string, "smartcloud")
 
     auto_sync = optional(bool, true)
     self_heal = optional(bool, true)

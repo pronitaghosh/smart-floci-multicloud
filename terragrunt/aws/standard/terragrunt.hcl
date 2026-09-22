@@ -45,7 +45,7 @@ dependency "bootstrap" {
     public_subnet_ids            = ["subnet-mock-a", "subnet-mock-b"]
     security_group_ids           = { shared = "sg-mock", redis = "sg-mock", alb = "sg-mock" }
     acm_certificate_arns         = { alb = "arn:aws:acm:us-east-1:000000000000:certificate/mock" }
-    bucket_regional_domain_names = { "msdemo-frontend-static" = "mock.s3.us-east-1.amazonaws.com" }
+    bucket_regional_domain_names = { "smartcloud-frontend-static" = "mock.s3.us-east-1.amazonaws.com" }
   }
 }
 
@@ -59,8 +59,8 @@ dependency "iam" {
   mock_outputs_allowed_terraform_commands = ["plan", "validate"]
   mock_outputs = {
     role_arns = {
-      "msdemo-cluster-cluster-role" = "arn:aws:iam::000000000000:role/mock"
-      "msdemo-cluster-node-role"    = "arn:aws:iam::000000000000:role/mock"
+      "smartcloud-cluster-cluster-role" = "arn:aws:iam::000000000000:role/mock"
+      "smartcloud-cluster-node-role"    = "arn:aws:iam::000000000000:role/mock"
     }
   }
 }
@@ -74,9 +74,9 @@ dependency "stateful" {
   mock_outputs_merge_strategy_with_state  = "shallow"
   mock_outputs_allowed_terraform_commands = ["plan", "validate"]
   mock_outputs = {
-    vault_unseal_key_ids       = { msdemo = "mock-key-id" }
-    vault_root_token_secrets   = { msdemo = "msdemo-vault-root-token" }
-    vault_recovery_key_secrets = { msdemo = "msdemo-vault-recovery-keys" }
+    vault_unseal_key_ids       = { smartcloud = "mock-key-id" }
+    vault_root_token_secrets   = { smartcloud = "smartcloud-vault-root-token" }
+    vault_recovery_key_secrets = { smartcloud = "smartcloud-vault-recovery-keys" }
   }
 }
 

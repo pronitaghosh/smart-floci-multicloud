@@ -79,16 +79,16 @@ mkdir -p k8s
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: msdemo-config
-  namespace: msdemo
+  name: smartcloud-config
+  namespace: smartcloud
 data:
   DB_HOST: "${DB_HOST}"
   DB_PORT: "${DB_PORT}"
   DB_NAME: "${DB_NAME}"
   ALB_DNS_NAME: "${ALB_DNS}"
-  USER_SERVICE_URL: "http://user-service.msdemo.svc.cluster.local:4001"
-  ORDER_SERVICE_URL: "http://order-service.msdemo.svc.cluster.local:4002"
-  PAYMENT_SERVICE_URL: "http://payment-service.msdemo.svc.cluster.local:4003"
+  USER_SERVICE_URL: "http://user-service.smartcloud.svc.cluster.local:4001"
+  ORDER_SERVICE_URL: "http://order-service.smartcloud.svc.cluster.local:4002"
+  PAYMENT_SERVICE_URL: "http://payment-service.smartcloud.svc.cluster.local:4003"
 EOF
 
   # Omit the Redis keys entirely when there is no cache. order-service treats
@@ -105,8 +105,8 @@ EOF
 apiVersion: v1
 kind: Secret
 metadata:
-  name: msdemo-db-secret
-  namespace: msdemo
+  name: smartcloud-db-secret
+  namespace: smartcloud
 type: Opaque
 stringData:
   DB_USER: "${DB_USER}"

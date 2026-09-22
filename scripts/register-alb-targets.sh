@@ -18,23 +18,23 @@ export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
 # Without this the script would register targets in the real AWS account.
 aws() { command aws --endpoint-url "$FLOCI_ENDPOINT" "$@"; }
 
-TG_ARN=$(aws elbv2 describe-target-groups --names msdemo-gateway-tg \
+TG_ARN=$(aws elbv2 describe-target-groups --names smartcloud-gateway-tg \
   --query 'TargetGroups[0].TargetGroupArn' --output text)
 echo "Target group: $TG_ARN"
 
 # Refuse to proceed if no gateway pod is actually serving -- otherwise we
 # register a node port that nothing is behind.
-READY=$(kubectl get pods -n msdemo -l app=gateway \
+READY=$(kubectl get pods -n smartcloud -l app=gateway \
   --field-selector=status.phase=Running \
   -o jsonpath='{.items[*].status.podIP}' | wc -w | tr -d ' ')
 if [ "$READY" -eq 0 ]; then
   echo "No running gateway pods -- is the deployment rolled out?" >&2
-  echo "  kubectl get pods -n msdemo -l app=gateway" >&2
+  echo "  kubectl get pods -n smartcloud -l app=gateway" >&2
   exit 1
 fi
 echo "Gateway pods running: $READY"
 
-NODE_PORT=$(kubectl get svc gateway -n msdemo -o jsonpath='{.spec.ports[0].nodePort}')
+NODE_PORT=$(kubectl get svc gateway -n smartcloud -o jsonpath='{.spec.ports[0].nodePort}')
 if [ -z "$NODE_PORT" ]; then
   echo "svc/gateway has no nodePort -- it must be type: NodePort for the ALB to reach it" >&2
   exit 1

@@ -108,7 +108,7 @@ CONTENT = {
         ("sec", "PARAMETER STORE", None, [
             ("aws_ssm_parameter", 6, "faithful"),
         ], [
-            "/msdemo/environment · /msdemo/ecr/<service> ×5",
+            "/smartcloud/environment · /smartcloud/ecr/<service> ×5",
         ]),
         ("out", "CARRIED FORWARD VIA resolved:", [
             "vpc_id · all_subnet_ids · public_subnet_ids",
@@ -223,7 +223,7 @@ CONTENT = {
         ("sec", "PARAMETER STORE", None, [
             ("aws_ssm_parameter", 1, "faithful"),
         ], [
-            "/msdemo/gateway_url",
+            "/smartcloud/gateway_url",
         ]),
         ("warn", "aws_cloudfront_* — DEFINED BUT DISABLED LOCALLY", [
             "aws_cloudfront_distribution · aws_cloudfront_origin_access_control",

@@ -1,13 +1,13 @@
 # Changelog
 
-## [09c5c68] - 2026-09-22 22:05:48 UTC - refactor: rename project identifier msdemo -> smartcloud
-- **Commit:** `09c5c686b873a0a297cc9a312157d397787dd1bd` (`09c5c68`)
+## [4f5f780] - 2026-09-22 22:05:48 UTC - refactor: rename project identifier msdemo -> smartcloud
+- **Commit:** `4f5f780697a285f3151354dce5c2d09eaf594479` (`4f5f780`)
 - **Date:** 2026-09-22 22:05:48 UTC (2026-09-22 15:05:48 PDT)
 - **Agent:** Muse Spark (opencode/muse-spark-1.2-contributor-free)
 - **Model:** muse-spark-1.2-contributor-free
 - **Version:** 1.2
 - **Working directory:** `/home/smartass/projects/multi-cloud-local/demo-floci-multicloud`
-- **Git base:** `c2bb6b2` `chore: update the documentation` -> `09c5c68` `refactor: rename project identifier msdemo -> smartcloud`
+- **Git base:** `c2bb6b2` `chore: update the documentation` -> `4f5f780` `refactor: rename project identifier msdemo -> smartcloud`
 
 ### Changed - Project rename `msdemo` -> `smartcloud`
 

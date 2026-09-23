@@ -470,7 +470,7 @@ for label, items, col in (
     text(sx + 22 + len(label) * 10.4, LEG_Y + 84, items, size=18, fill=MUTED)
     sx += 60 + (len(label) * 10.4) + (len(items) * 9.3)
 
-text(W - 76, LEG_Y + 84, "github.com/elokac/floci-aws-demo", size=18,
+text(W - 76, LEG_Y + 84, "github.com/pronitaghosh/smart-floci-multicloud", size=18,
      fill=MUTED, anchor="end")
 text(W - 76, LEG_Y + 42, "Counts, colours and flows describe the stack as applied.",
      size=18, fill=MUTED, anchor="end")

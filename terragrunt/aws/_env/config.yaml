@@ -22,9 +22,11 @@ global:
 
   # Where pods reach the emulated AWS API. A pod's localhost is its own
   # loopback, so this is floci's address on the docker network.
-  in_cluster_endpoint_url: http://localhost:4566
+  # __FLOCI_IP__ is replaced at read time from TG_FLOCI_IN_CLUSTER (see env.hcl/root.hcl)
+  # so the file is not edited when Docker subnet changes.
+  in_cluster_endpoint_url: __FLOCI_IP__
   tags:
-    Owner: eloka
+    Owner: pronitag
     Project: smartcloud
     Purpose: floci-demo
   provider_aliases:
@@ -233,8 +235,8 @@ argocd:
     apps_chart_version: "2.0.2"
     # Argo owns everything under this path. The repo must be reachable from
     # inside the cluster, and public until a deploy key is configured.
-    repo_url: https://github.com/elokac/floci-aws-demo.git
-    target_revision: main
+    repo_url: https://github.com/pronitaghosh/smart-floci-multicloud.git
+    target_revision: reformats  # Branch Name
     path: k8s
     destination_namespace: smartcloud
     auto_sync: true

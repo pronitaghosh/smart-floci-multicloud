@@ -17,9 +17,13 @@ locals {
   # Secrets are substituted here rather than by a preprocessing step, so there
   # is no generated config file on disk and no extra tooling to install.
   merged_config = replace(
-    file("${get_parent_terragrunt_dir()}/_env/${local.env.config_file}"),
-    "__DB_PASSWORD__",
-    local.env.db_password,
+    replace(
+      file("${get_parent_terragrunt_dir()}/_env/${local.env.config_file}"),
+      "__DB_PASSWORD__",
+      local.env.db_password,
+    ),
+    "__FLOCI_IP__",
+    local.env.floci_in_cluster,
   )
 
   merged_config_hcl = try(yamldecode(local.merged_config), {})

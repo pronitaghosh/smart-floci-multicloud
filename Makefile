@@ -13,6 +13,9 @@ STACKS          ?= bootstrap iam stateful standard
 CLIENT_NAME     ?= smartcloud
 ENVIRONMENT_NAME?= dev
 FLOCI_ENDPOINT  ?= http://localhost:4566
+# Auto-detect floci IP for in-cluster endpoint ( Vault seal ); no hard-coded network/container
+FLOCI_IP        ?= $(shell CID=$$(docker ps --filter label=com.docker.compose.service=floci --format '{{.Names}}' 2>/dev/null | head -1); docker inspect -f '{{range $$k,$$v:=.NetworkSettings.Networks}}{{if ne $$k "bridge"}}{{$$v.IPAddress}}{{end}}{{end}}' $$CID 2>/dev/null || echo 172.20.0.10)
+export TG_FLOCI_IN_CLUSTER ?= http://$(FLOCI_IP):4566
 
 # Terragrunt 1.x defaults to OpenTofu; this project targets Terraform.
 export TG_TF_PATH            ?= terraform
@@ -97,7 +100,7 @@ plan-all: check-floci ## Plan every stack in dependency order
 	@$(TG) run --all plan --working-dir $(TG_DIR) --provider-cache
 
 apply-all: check-floci ## Apply every stack in dependency order
-	@$(TG) run --all apply --working-dir $(TG_DIR) --provider-cache
+	@$(TG) run --all apply --working-dir $(TG_DIR) --provider-cache -auto-approve
 
 destroy-all: check-floci ## Destroy every stack in reverse order
 	@$(TG) run --all destroy --working-dir $(TG_DIR) --provider-cache
@@ -172,25 +175,58 @@ argocd-ui: ## Port-forward the ArgoCD UI to localhost:8080
 
 ##@ Lifecycle
 
-# On a cold start the cluster does not exist when `standard` first runs, so its
+# On a clean slate `standard` fails before EKS exists:
+#   provider["registry.terraform.io/hashicorp/kubernetes"] context
+#   "arn:aws:eks:us-east-1:000000000000:cluster/<cluster-name>" does not exist
+# because `tg-gen-k8s-providers.tf` is evaluated before `module.eks_cluster` is
+# created. Fix is to create the cluster first without Helm, then write kubeconfig,
+# then apply the rest.
+# FIX: Line 184-193 replaces previous "apply-all kubeconfig apply-all" targets. Sort of expanded it 
+# to process each part seperately, so that the cluster is created first, then kubeconfig is written, then the rest of the stack is applied.
+# NO LONGER VALID: On a cold start the cluster does not exist when `standard` first runs, so its
 # Helm releases fail. kubeconfig + a second apply-all settles it.
-up: apply-all kubeconfig apply-all outputs images deploy targets frontend ## Full build from nothing
+up: check-floci ## Full build from nothing (cold-start safe)
+	@echo "=== bootstrap/iam/stateful ==="
+	@$(TG) apply --working-dir $(TG_DIR)/bootstrap --provider-cache -auto-approve
+	@$(TG) apply --working-dir $(TG_DIR)/iam --provider-cache -auto-approve
+	@$(TG) apply --working-dir $(TG_DIR)/stateful --provider-cache -auto-approve
+	@echo "=== standard: EKS only (cold-start) ==="
+	@$(TG) apply --working-dir $(TG_DIR)/standard --target=module.eks_cluster --provider-cache -auto-approve || true
+	@$(MAKE) kubeconfig
+	@echo "=== standard: Vault/ArgoCD/ALB (now kubeconfig exists) ==="
+	@$(TG) apply --working-dir $(TG_DIR)/standard --provider-cache -auto-approve
+	@$(MAKE) outputs images deploy targets frontend
 	@echo ""
 	@echo "Stack is up. Exercise it end to end:"
 	@echo "  ALB=\$$(./scripts/lib/outputs.sh alb_dns_name)"
 	@echo "  curl -s -X POST \"http://\$$ALB/api/orders\" -H 'Content-Type: application/json' \\"
 	@echo "    -d '{\"user_id\":1,\"item\":\"widget\",\"amount_cents\":4200}'"
 
-down: destroy-all ## Tear everything down
-	@echo "destroyed"
+# FIX: clean up `floci-registry` containers as it's not part of docker-compose, 
+# it is not docker aware. registry container is required by floci internally and it pulls it up 
+docker-start: ## Start floci docker containers
+	@docker compose up -d
+	@echo "docker up"
 
-clean: ## Remove generated files and caches (not state)
-	@find $(TG_DIR) -name '.terragrunt-cache' -type d -prune -exec rm -rf {} + 2>/dev/null || true
-	@find $(TG_DIR) -name '.tfplan' -type d -prune -exec rm -rf {} + 2>/dev/null || true
-	@rm -f .outputs.json k8s/01-config.yaml
-	@echo "cleaned"
+docker-clean: ## Remove floci docker containers/networks only (no terraform)
+	@docker ps -aq --filter label=floci=true | xargs -r docker rm -f 2>/dev/null || true
+	@docker compose down -v --remove-orphans 2>/dev/null || true
+	@echo "docker cleaned"
+
+down: destroy-all ## Tear everything down
+	@if docker ps -aq --filter label=floci=true | grep -q .; then echo "floci containers exist, running docker-clean..."; $(MAKE) docker-clean; else echo "no floci containers to clean"; fi
+	@echo "workspace destroyed"
+
+clean: ## Remove generated files and caches (including state)
+	@find $(TG_DIR) -name '.terragrunt-cache' -type d -prune -exec rm -rvf {} + 2>/dev/null || true
+	@find $(TG_DIR) -name '.tfplan' -type d -prune -exec rm -rvf {} + 2>/dev/null || true
+	@find . -name '.terragrunt-cache' -type d -prune -exec rm -rvf {} + 2>/dev/null || true
+	@find terraform/modules -name ".terraform" -type d -prune -exec rm -rfv {} + 2>/dev/null || true
+	@rm -rvf .state/dev .terragrunt-cache dist/ .terraform
+	@rm -fv .outputs.json k8s/01-config.yaml build-images.txt docker_start*.log make_up*.log make.up*.log
+	@echo "workspace cleaned"
 
 .PHONY: help check-floci fmt validate plan apply destroy output \
         plan-all apply-all destroy-all outputs images deploy targets \
-        frontend verify restart up down clean vault-status vault-token vault-ui \
+        frontend verify restart up down docker-start docker-clean clean vault-status vault-token vault-ui \
         argocd-sync argocd-refresh argocd-password argocd-ui kubeconfig

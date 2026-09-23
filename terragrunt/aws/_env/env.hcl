@@ -42,4 +42,9 @@ locals {
   # Substituted into the config at read time so no credential is ever written
   # to disk. The default is a throwaway for local floci runs only.
   db_password = get_env("TF_VAR_db_password", "LocalDemoPass123!")
+
+  # floci in-cluster endpoint: auto-detected via docker inspect; no hard-coded
+  # IP/container. TG_FLOCI_IN_CLUSTER env overrides. Falls back to docker ps
+  # (label com.docker.compose.service=floci) without static name/subnet.
+  floci_in_cluster = get_env("TG_FLOCI_IN_CLUSTER", run_cmd("--terragrunt-quiet", "sh", "-c", "CID=$(docker ps --filter label=com.docker.compose.service=floci --format '{{.Names}}' 2>/dev/null | head -1); [ -n \"$CID\" ] && docker inspect -f '{{range $k,$v:=.NetworkSettings.Networks}}{{if ne $k \"bridge\"}}{{$v.IPAddress}}{{end}}{{end}}' \"$CID\" 2>/dev/null | awk '{if ($1) print \"http://\"$1\":4566\"}' || echo \"\""))
 }

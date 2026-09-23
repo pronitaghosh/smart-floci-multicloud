@@ -107,12 +107,16 @@ generate "dynamic_modules" {
 # the endpoint of a cluster this same stack is about to build. Reading the
 # kubeconfig instead keeps the configuration static and plan-safe.
 #
-# The consequence, stated plainly: on a cold start the cluster does not exist
-# when this stack first runs, so the Helm releases fail on that first apply.
-# Run `make kubeconfig` and apply again -- the second run succeeds and every
-# run after that is idempotent. Splitting platform tooling into its own stack
-# is the usual way to avoid this; keeping it here trades that for one fewer
-# stack.
+# The consequence: on a clean slate `make up` fails at
+#   provider["registry.terraform.io/hashicorp/kubernetes"] context
+#   "arn:aws:eks:us-east-1:000000000000:cluster/<name>" does not exist
+# because `tg-gen-k8s-providers.tf` is evaluated before `module.eks_cluster`
+# exists. The project handles it by cold-start sequence:
+#   cd terragrunt/aws/standard
+#   terragrunt apply -target=module.eks_cluster
+#   make kubeconfig   # writes ~/.kube/config context
+# then full apply. Splitting platform (Vault/ArgoCD) into its own stack is
+# the usual way to avoid this; keeping it here trades that for one fewer stack.
 #
 # Auth is the ordinary EKS exec pattern, not an emulator special case: floci
 # wires a token authentication webhook into the k3s apiserver, and
@@ -141,7 +145,11 @@ generate "k8s_providers" {
 terraform {
   source = local.module_source
 
-  # Stash the plan so `plan` and `apply` can be separate CI jobs.
+  before_hook "ensure_kubeconfig" {
+    commands = ["plan", "apply", "validate"]
+    execute  = ["bash", "-c", "mkdir -p ~/.kube; touch ~/.kube/config; if ! kubectl config get-contexts \"arn:aws:eks:${include.env.locals.region}:000000000000:cluster/${local.cluster_name}\" >/dev/null 2>&1; then kubectl config set-cluster dummy --server=https://127.0.0.1:65534 --insecure-skip-tls-verify=true >/dev/null 2>&1 || true; kubectl config set-credentials dummy --exec-api-version=client.authentication.k8s.io/v1beta1 --exec-command=aws --exec-arg=eks --exec-arg=get-token --exec-arg=--cluster-name --exec-arg=${local.cluster_name} --exec-arg=--region --exec-arg=${include.env.locals.region} >/dev/null 2>&1 || true; kubectl config set-context \"arn:aws:eks:${include.env.locals.region}:000000000000:cluster/${local.cluster_name}\" --cluster=dummy --user=dummy >/dev/null 2>&1 || true; fi"]
+  }
+
   before_hook "before_copy_tfplan" {
     commands = ["apply"]
     execute  = ["bash", "-c", "cp ${local.tfplan_path}/.${basename(get_terragrunt_dir())}.tfplan . 2>/dev/null || :"]

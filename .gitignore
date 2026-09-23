@@ -42,3 +42,12 @@ repro/
 *.zip
 .DS_Store
 kubeconfig
+
+
+# --- Local Track files ---
+CHANGELOG.md
+LEARNINGS.md
+JOURNAL.md
+TROUBLESHOOT.md
+PG_initiate.md
+K8-commands.md

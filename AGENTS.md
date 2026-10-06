@@ -6,3 +6,10 @@
 - LEARNINGS.md is a live journal. Add content only when user explicitly requests.
 
 Apply to all agents and tools.
+
+## Commits
+
+Every commit message follows this rule: industry-standard conventional form
+(`type(scope): subject` with a short structured body), concise prose, no code
+— no file paths, commands, snippets, or identifiers. Sign off for the DCO
+(`git commit -s`).

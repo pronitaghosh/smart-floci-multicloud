@@ -44,6 +44,17 @@ repro/
 kubeconfig
 
 
+# --- Symlinks ---
+# Mirrors of root files plus .opencode, kept for browsing only.
+# ripgrep-based search respects gitignore, so listing them here keeps
+# grep/glob from returning each file twice. Read the root originals.
+docs/AGENTS.md
+docs/K8-commands.md
+docs/LEARNINGS.md
+docs/PG_initiate.md
+docs/README.md
+docs/opencode-dot
+
 # --- Local Track files ---
 CHANGELOG.md
 LEARNINGS.md

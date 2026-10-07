@@ -25,3 +25,17 @@ Append-only. One entry per block gate.
 - New files: Makefile.gcp, docs/gcp-journal.md
 - Tokens: input/output/total not tracked in session
 - Sign-off: user approved
+
+## 2026-10-07T17:49:42Z — Block 2 config and provider
+
+- Agent: Muse Spark
+- Model: opencode/muse-spark-1.3-contributor-free
+- Block/phase: Block 2 config, env through gate
+- Summary: Mirrored AWS terragrunt shapes with GCP names; versioned custom endpoints plus fake token in local mode and plain provider in real mode; enumerated compat gates; stub stacks validate in both modes with no tracked credential.
+- Thought: goal single YAML input driving both modes; why additive mirror keeps AWS untouched; next Block 3 leaf modules on this wiring.
+- Status: complete, user approved
+- Files changed: AGENTS.md
+- New files: docs/gcp-journal.md, docs/gcp-compat-gates.md, terragrunt/gcp tree, terraform/modules-gcp placeholder composites
+- Deferred to Block 3: KMS lifecycle fields, bucket lifecycle fields, bucket versioning plus public access prevention (TOFIX in config).
+- Tokens: input/output/total not tracked in session
+- Sign-off: user approved

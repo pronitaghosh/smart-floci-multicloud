@@ -28,4 +28,6 @@ Use `floci-pyenv/bin/python` for any python command execution.
 ## Learning session
 
 - This is a learning session. User asks to understand what agent does and why.
+- Each agent response ends with one `Thought:` line: goal, why, next.
+- Each block journal entry includes one `Thought:` line.
 - Add agent responses to `docs/LEARNINGS-GCP-FLOCI.md` only when user explicitly requests.

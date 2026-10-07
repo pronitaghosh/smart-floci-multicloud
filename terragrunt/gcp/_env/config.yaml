@@ -1,0 +1,166 @@
+#------------------------------------------------------------------
+# smartcloud — base configuration (GCP)
+#------------------------------------------------------------------
+# The single input for every GCP stack. Correct for REAL GCP as written; the
+# global.floci_compat switch below is the entire local-emulator surface.
+#------------------------------------------------------------------
+
+global:
+  client_name: smartcloud
+  environment: dev
+  project: floci-local
+  region: us-central1
+  endpoint_url: http://localhost:4588
+
+  # floci-gcp cannot emulate a handful of behaviours faithfully. Rather than
+  # scattering flags through the modules, one switch is honoured in the
+  # composites, each commented at the point of use:
+  #   composite-stateful  -> SQL fields the emulator does not round-trip
+  #   composite-standard  -> NodePort plus registration instead of LB IPs
+  # Set false to target real GCP with everything enabled.
+  floci_compat: true
+
+  # Where pods reach the emulated GCP API. A pod's localhost is its own
+  # loopback, so this is floci-gcp's address on the docker network.
+  in_cluster_endpoint_url: __FLOCI_IP__
+  labels:
+    owner: pronitag
+    project: smartcloud
+    purpose: floci-demo
+
+#------------------------------------------------------------------
+# Stack: bootstrap
+#------------------------------------------------------------------
+
+network:
+  name: smartcloud
+  auto_create_subnetworks: false
+  subnets:
+    - { name: public-us-central1-a, cidr: 10.30.0.0/24, region: us-central1 }
+    - { name: private-us-central1-a, cidr: 10.30.10.0/24, region: us-central1 }
+  firewall_rules:
+    - name: allow-internal
+      description: "Intra-VPC traffic"
+      source_ranges: ["10.30.0.0/16"]
+    - name: allow-http
+      description: "Allow HTTP from the internet"
+      source_ranges: ["0.0.0.0/0"]
+    - name: allow-https
+      description: "Allow HTTPS from the internet"
+      source_ranges: ["0.0.0.0/0"]
+
+kms_keys:
+  # TOFIX: Add lifecycle rules for keys, e.g., deletion after 7 days
+  - name: key
+    description: "smartcloud demo encryption key"
+
+artifact_registry_repositories:
+  - { name: frontend }
+  - { name: gateway }
+  - { name: user-service }
+  - { name: order-service }
+  - { name: payment-service }
+
+buckets:
+  # TOFIX: Add lifecycle rules for buckets, e.g., deletion after 7  days
+  # TOFIX: Add Versioning, block public access
+  - name: smartcloud-frontend-static
+
+project_services:
+  - compute.googleapis.com
+  - container.googleapis.com
+  - sqladmin.googleapis.com
+  - run.googleapis.com
+  - secretmanager.googleapis.com
+  - cloudkms.googleapis.com
+  - pubsub.googleapis.com
+  - bigquery.googleapis.com
+
+#------------------------------------------------------------------
+# Stack: iam
+#------------------------------------------------------------------
+
+service_accounts:
+  - name: smartcloud-gke-node
+    description: "GKE node identity"
+  - name: smartcloud-app
+    description: "Application identity for Secret Manager and GCS"
+  - name: smartcloud-run-invoker
+    description: "Cloud Run invoker identity"
+
+project_iam_members:
+  - member: smartcloud-gke-node
+    roles:
+      - roles/artifactregistry.reader
+  - member: smartcloud-app
+    roles:
+      - roles/secretmanager.secretAccessor
+      - roles/storage.objectViewer
+  - member: smartcloud-run-invoker
+    roles:
+      - roles/run.invoker
+
+#------------------------------------------------------------------
+# Stack: stateful
+#------------------------------------------------------------------
+
+sql_instances:
+  - name: postgres
+    database_version: POSTGRES_16
+    tier: db-custom-1-3840
+    database_name: smartcloud
+    username: smartcloud_admin
+    password: "__DB_PASSWORD__"
+
+firestore_databases:
+  - name: "(default)"
+    type: FIRESTORE_NATIVE
+
+pubsub_topics:
+  - name: orders
+  - name: payments
+
+pubsub_subscriptions:
+  - name: orders-sub
+    topic_name: orders
+  - name: payments-sub
+    topic_name: payments
+
+secrets:
+  # Values are assembled by composite-stateful from this stack's own outputs —
+  # the SQL endpoint is not known until apply time.
+  - name: smartcloud/app-credentials
+    description: "Application database credentials"
+    values: {}
+
+  # Container only. The platform stack writes the real value once
+  # ArgoCD has generated it.
+  - name: smartcloud/argocd-admin
+    description: "ArgoCD initial admin password"
+    values: {}
+
+#------------------------------------------------------------------
+# Stack: standard
+#------------------------------------------------------------------
+
+clusters:
+  - name: smartcloud-cluster
+    location: us-central1
+    node_pools:
+      - name: smartcloud-cluster-np
+        node_count: 2
+        machine_type: e2-medium
+
+cloud_run_services:
+  - name: smartcloud-gateway
+    image_name: gateway
+    port: 8080
+
+argocd:
+  - name: argocd
+    namespace: argocd
+    chart_version: "7.7.11"
+    repo_url: https://github.com/pronitaghosh/smart-floci-multicloud.git
+    target_revision: gcp    # Branch Name
+    path: k8s/gcp           # K8 manifests (NOTE: Is it required?)
+    destination_namespace: smartcloud

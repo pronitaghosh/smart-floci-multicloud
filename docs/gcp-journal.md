@@ -52,3 +52,16 @@ Append-only. One entry per block gate.
 - New files: docs/gcp-journal.md, terraform/modules-gcp leaf modules and composites
 - Tokens: input/output/total not tracked in session
 - Sign-off: user approved
+
+## 2026-10-07T15:15:00Z — Block 4 stateful
+
+- Agent: Muse Spark
+- Model: opencode/muse-spark-1.3-contributor-free
+- Block/phase: Block 4 stateful, modules through round-trips
+- Summary: Built four leaf modules plus stateful composite with resolved merge and demo-password guardrail; applied 11 resources from reviewed plan files; renamed slash secrets after provider read-back failure; round-trips pass for publish/pull, secret access, KMS encrypt/decrypt, SQL RUNNABLE with ready sidecar; Firestore stays SDK placeholder.
+- Thought: goal data plane on foundation outputs; why slash-free IDs are provider-mandated; next Block 5 standard on these outputs.
+- Status: complete, awaiting user approval
+- Files changed: docs/gcp-compat-gates.md, terragrunt/gcp/stateful/terragrunt.hcl, terragrunt/gcp/_env/config.yaml
+- New files: docs/gcp-journal.md, terraform/modules-gcp stateful modules and composite
+- Tokens: input/output/total not tracked in session
+- Sign-off: user approved

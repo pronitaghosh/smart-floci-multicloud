@@ -13,7 +13,8 @@ Enumerated local workarounds. Each maps to file and field. Honoured only when `g
 | 7 | Null SQL fields the emulator does not round-trip | terraform/modules-gcp/composite-stateful | Block 4 |
 | 8 | GCS bucket shape-only versioning/policy | terraform/modules-gcp/composite-bootstrap | Block 3 |
 | 9 | Firewall rules shape-only, source ranges required | terragrunt/gcp/_env/config.yaml | `network.firewall_rules[].source_ranges` |
-| 10 | Firestore via SDK, not Terraform | n/a | Block 0 verdict |
+| 10 | Firestore via SDK, not Terraform (create 404s) | terraform/modules-gcp/firestore/main.tf | placeholder outputs |
+| 15 | Secret IDs must be slash-free; provider import regex rejects slashes | terragrunt/gcp/_env/config.yaml | `secrets[].name` dashed |
 | 11 | Artifact Registry create 404s via Terraform and REST; module publishes address pattern only, repos land in Block 6 | terraform/modules-gcp/registry/main.tf | placeholder outputs |
 | 12 | NodePort plus registration instead of LB IPs | terraform/modules-gcp/composite-standard | Block 5 |
 | 13 | No Memorystore; Firestore plus PubSub cover stateful | terragrunt/gcp/_env/config.yaml | no redis section |

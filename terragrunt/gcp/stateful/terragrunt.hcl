@@ -23,6 +23,32 @@ locals {
   )
 }
 
+# ------------------------------------------------------------------
+# Upstream stacks
+# ------------------------------------------------------------------
+# Values come from upstream state, folded into the YAML under `resolved:`.
+# mock_outputs keep `plan` working before a first apply.
+# ------------------------------------------------------------------
+
+dependency "bootstrap" {
+  config_path = "../bootstrap"
+
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs_allowed_terraform_commands = ["plan", "validate"]
+  mock_outputs = {
+    network_id = "projects/floci-local/global/networks/smartcloud"
+    subnet_ids = {
+      public  = "projects/floci-local/regions/us-central1/subnetworks/public-us-central1-a"
+      private = "projects/floci-local/regions/us-central1/subnetworks/private-us-central1-a"
+    }
+  }
+}
+
+dependency "iam" {
+  config_path  = "../iam"
+  skip_outputs = true
+}
+
 terraform {
   source = local.module_source
 
@@ -38,6 +64,22 @@ terraform {
   }
 }
 
+# ------------------------------------------------------------------
+# Inputs
+# ------------------------------------------------------------------
+# The composite still takes exactly one variable. Upstream values are folded
+# into the same YAML document under `resolved:`, so the module never learns
+# that separate states exist.
+# ------------------------------------------------------------------
+
 inputs = {
-  config = local.merged_config
+  config = yamlencode(merge(
+    local.merged_config_hcl,
+    {
+      resolved = {
+        network_id = dependency.bootstrap.outputs.network_id
+        subnet_ids = dependency.bootstrap.outputs.subnet_ids
+      }
+    }
+  ))
 }

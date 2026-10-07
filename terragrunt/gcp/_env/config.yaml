@@ -130,13 +130,13 @@ pubsub_subscriptions:
 secrets:
   # Values are assembled by composite-stateful from this stack's own outputs —
   # the SQL endpoint is not known until apply time.
-  - name: smartcloud/app-credentials
+  - name: smartcloud-app-credentials
     description: "Application database credentials"
     values: {}
 
   # Container only. The platform stack writes the real value once
   # ArgoCD has generated it.
-  - name: smartcloud/argocd-admin
+  - name: smartcloud-argocd-admin
     description: "ArgoCD initial admin password"
     values: {}
 

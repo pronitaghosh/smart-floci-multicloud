@@ -13,3 +13,19 @@ Every commit message follows this rule: industry-standard conventional form
 (`type(scope): subject` with a short structured body), concise prose, no code
 — no file paths, commands, snippets, or identifiers. Sign off for the DCO
 (`git commit -s`).
+
+## Python
+
+Use `floci-pyenv/bin/python` for any python command execution.
+
+## Implementation control
+
+- User `pause` stops phased work immediately, enters interactive questions mode.
+- User `resume` continues from last checkpoint, no repeat.
+- While paused: no applies, no file changes, no emulator changes unless user requests.
+- Terraform: run `plan -out` to a file for user review before any `apply`. Apply uses the reviewed plan file.
+
+## Learning session
+
+- This is a learning session. User asks to understand what agent does and why.
+- Add agent responses to `docs/LEARNINGS-GCP-FLOCI.md` only when user explicitly requests.

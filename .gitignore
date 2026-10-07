@@ -37,6 +37,9 @@ build-images.txt
 node_modules/
 npm-debug.log*
 
+# --- Python ---
+floci-pyenv/
+
 # --- Local scratch ---
 repro/
 *.zip

@@ -1,6 +1,7 @@
 
 name: floci-smart-cloud
 services:
+  # AWS Floci Service
   floci:
     image: floci/floci:latest
     ports:
@@ -16,6 +17,26 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - default
+
+  # GCP Floci Service (Smartass)
+  floci-gcp:
+    image: floci/floci-gcp:latest
+    ports:
+      - "4588:4588"
+    volumes:
+      - ./data-gcp:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      FLOCI_GCP_HOSTNAME: floci-gcp
+      FLOCI_GCP_BASE_URL: http://floci-gcp:4588
+      FLOCI_GCP_STORAGE_MODE: ${FLOCI_GCP_STORAGE_MODE:-memory}
+    labels:
+      - "floci-gcp=true"
+    networks:
+      - default
+
+volumes:
+  data-gcp:
 
 networks:
   default:

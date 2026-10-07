@@ -1,0 +1,26 @@
+# GCP emulator lifecycle (mirrors AWS docker targets, scoped to floci-gcp only).
+# Storage rule: memory for verification runs, hybrid for interactive dev only.
+# SQL host range 7100-7110 reserved (avoids AWS 7000-7010); wiring lands in Block 5.
+
+# TODO: Review Item - Remove Block messages
+
+GCP_ENDPOINT ?= http://localhost:4588
+
+gcp-start: ## Start floci-gcp only
+	docker compose up -d floci-gcp
+	@echo "floci-gcp up at $(GCP_ENDPOINT)"
+
+gcp-check: ## Fail fast if floci-gcp is not reachable
+	@curl -s -m 5 "$(GCP_ENDPOINT)/_floci-gcp/info" >/dev/null 2>&1 \
+		|| { echo "floci-gcp not reachable at $(GCP_ENDPOINT) -- run: make -f Makefile.gcp gcp-start" >&2; exit 1; }
+	@echo "floci-gcp is up at $(GCP_ENDPOINT)"
+
+gcp-reset: ## Wipe emulator state without restart
+	@curl -s -m 10 -X POST "$(GCP_ENDPOINT)/_floci-gcp/state/reset" && echo "state reset"
+
+gcp-clean: ## Remove floci-gcp containers only (no AWS, no terraform)
+	@docker ps -aq --filter label=floci-gcp=true | xargs -r docker rm -f 2>/dev/null || true
+	@echo "floci-gcp cleaned"
+
+gcp-logs: ## Tail floci-gcp logs
+	@docker compose logs -f floci-gcp

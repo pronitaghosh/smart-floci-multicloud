@@ -40,6 +40,9 @@ npm-debug.log*
 # --- Python ---
 floci-pyenv/
 
+# --- GCP emulator data ---
+data-gcp/
+
 # --- Local scratch ---
 repro/
 *.zip

@@ -50,9 +50,9 @@ network:
       source_ranges: ["0.0.0.0/0"]
 
 kms_keys:
-  # TOFIX: Add lifecycle rules for keys, e.g., deletion after 7 days
   - name: key
     description: "smartcloud demo encryption key"
+    rotation_period: "7776000s"
 
 artifact_registry_repositories:
   - { name: frontend }
@@ -62,9 +62,10 @@ artifact_registry_repositories:
   - { name: payment-service }
 
 buckets:
-  # TOFIX: Add lifecycle rules for buckets, e.g., deletion after 7  days
-  # TOFIX: Add Versioning, block public access
   - name: smartcloud-frontend-static
+    versioning: true
+    public_access_prevention: "enforced"
+    lifecycle_age_days: 7
 
 project_services:
   - compute.googleapis.com
@@ -88,15 +89,15 @@ service_accounts:
   - name: smartcloud-run-invoker
     description: "Cloud Run invoker identity"
 
-project_iam_members:
-  - member: smartcloud-gke-node
+project_iam_bindings:
+  - account: smartcloud-gke-node
     roles:
       - roles/artifactregistry.reader
-  - member: smartcloud-app
+  - account: smartcloud-app
     roles:
       - roles/secretmanager.secretAccessor
       - roles/storage.objectViewer
-  - member: smartcloud-run-invoker
+  - account: smartcloud-run-invoker
     roles:
       - roles/run.invoker
 

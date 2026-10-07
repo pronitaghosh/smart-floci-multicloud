@@ -24,6 +24,7 @@ Use `floci-pyenv/bin/python` for any python command execution.
 - User `resume` continues from last checkpoint, no repeat.
 - While paused: no applies, no file changes, no emulator changes unless user requests.
 - Terraform: run `plan -out` to a file for user review before any `apply`. Apply uses the reviewed plan file.
+- GCP stack verification: use `helper-pg/verify-tf-stack.sh <stack-dir> full` for init, validate, plan; `apply` only the reviewed plan file.
 
 ## Learning session
 

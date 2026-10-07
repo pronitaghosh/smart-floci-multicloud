@@ -32,7 +32,7 @@ locals {
   # false is what a two-repo split looks like: the live repo consumes the
   # module repo from a registry at a pinned version.
   tf_local_module      = get_env("TG_TF_LOCAL_MODULE", "true")
-  tf_local_module_path = get_env("TG_TF_LOCAL_MODULE_PATH", "../../../terraform/modules-gcp")
+  tf_local_module_path = get_env("TG_TF_LOCAL_MODULE_PATH", "../../../terraform")
   tf_module_repo       = get_env("TG_TF_MODULE_REPO", "registry.terraform.io/elokac/floci-gcp/gcp//modules")
   tf_module_version    = get_env("TG_TF_MODULE_VERSION", "0.1.0")
 

@@ -14,7 +14,7 @@ Enumerated local workarounds. Each maps to file and field. Honoured only when `g
 | 8 | GCS bucket shape-only versioning/policy | terraform/modules-gcp/composite-bootstrap | Block 3 |
 | 9 | Firewall rules shape-only, source ranges required | terragrunt/gcp/_env/config.yaml | `network.firewall_rules[].source_ranges` |
 | 10 | Firestore via SDK, not Terraform | n/a | Block 0 verdict |
-| 11 | Artifact Registry Terraform unsupported | n/a | Block 0 verdict, Block 6 flow |
+| 11 | Artifact Registry create 404s via Terraform and REST; module publishes address pattern only, repos land in Block 6 | terraform/modules-gcp/registry/main.tf | placeholder outputs |
 | 12 | NodePort plus registration instead of LB IPs | terraform/modules-gcp/composite-standard | Block 5 |
 | 13 | No Memorystore; Firestore plus PubSub cover stateful | terragrunt/gcp/_env/config.yaml | no redis section |
 | 14 | BigQuery, LB Terraform, Run job stretch-only | n/a | Block 8 |

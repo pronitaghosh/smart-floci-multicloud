@@ -17,7 +17,7 @@ locals {
   tfplan_path = "${get_terragrunt_dir()}/.tfplan/"
 
   module_source = include.env.locals.tf_local_module == "true" ? (
-    "${include.env.locals.tf_local_module_path}${local.submodule}"
+    "${include.env.locals.tf_local_module_path}//modules-gcp${local.submodule}"
     ) : (
     "tfr://${include.env.locals.tf_module_repo}${local.submodule}?version=${include.env.locals.tf_module_version}"
   )

@@ -39,3 +39,16 @@ Append-only. One entry per block gate.
 - Deferred to Block 3: KMS lifecycle fields, bucket lifecycle fields, bucket versioning plus public access prevention (TOFIX in config).
 - Tokens: input/output/total not tracked in session
 - Sign-off: user approved
+
+## 2026-10-07T13:05:00Z — Block 3 bootstrap plus IAM
+
+- Agent: Muse Spark
+- Model: opencode/muse-spark-1.3-contributor-free
+- Block/phase: Block 3 foundation, modules through apply
+- Summary: Built six leaf modules and two composites mirroring AWS shapes with labels; applied bootstrap 17 resources then IAM 7 resources from reviewed plan files; registry repos stay placeholder outputs after 404 re-probe; pod access via bindings plus documented emulator bypass.
+- Thought: goal foundation outputs for stateful handoff; why placeholder keeps gate unblocked with recorded deviation; next Block 4 stateful on these outputs.
+- Status: complete, user approved
+- Files changed: docs/gcp-compat-gates.md, terragrunt/gcp/_env/env.hcl, terragrunt/gcp leaf configs, terragrunt/gcp/_env/config.yaml
+- New files: docs/gcp-journal.md, terraform/modules-gcp leaf modules and composites
+- Tokens: input/output/total not tracked in session
+- Sign-off: user approved

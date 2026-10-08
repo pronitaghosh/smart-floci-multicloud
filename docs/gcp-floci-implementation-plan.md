@@ -8,7 +8,7 @@ Assignee: single Agent named here.
 Branch and working directory: filled here.
 Environment defaults: client name, environment name, GCP project, GCP endpoint, in-cluster endpoint, fake token.
 Confirmations required before: creating the compose service, applying any stack, pushing images, touching shared files.
-Doc authority: during implementation the Agent refers to the floci-gcp documentation for emulator behavior. If required information is not found in the first attempt, the Agent consults the User before proceeding.
+Doc authority: during implementation the Agent refers to the floci-gcp documentation at https://floci.io/floci-gcp/services/ for emulator behavior. If required information is not found in the first attempt, the Agent consults the User before proceeding.
 User test gate: after each block the Agent informs the User with block outputs and acceptance evidence, then waits. The User tests and verifies status. The next block starts only after User approval. A git commit happens only on explicit User commit confirmation for that block, with an industry standard concise message describing the outcome, with no reference to code.
 Live journal: during implementation the Agent keeps an append-only journal at docs/gcp-journal.md. Each entry records date-time UTC, agent name, model ID, block and phase, work summary, final status, files changed, new files, token usage as input plus output plus total counts, and User sign-off status.
 Shared-file rule: additive only. The AWS terragrunt tree, AWS terraform modules, AWS compose service, AWS state, AWS outputs file and AWS make targets are read-only.

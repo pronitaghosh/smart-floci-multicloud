@@ -18,6 +18,10 @@ Every commit message follows this rule: industry-standard conventional form
 
 Use `floci-pyenv/bin/python` for any python command execution.
 
+## Floci docs
+
+When asked to read floci documents, refer to https://floci.io/floci-gcp/services/.
+
 ## Implementation control
 
 - User `pause` stops phased work immediately, enters interactive questions mode.

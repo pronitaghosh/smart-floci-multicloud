@@ -6,7 +6,7 @@ Journal: append-only at docs/gcp-journal.md. Each entry records date-time UTC, a
 
 Global read-only rule: the AWS terragrunt tree, AWS terraform modules, the AWS compose service, AWS state, the AWS outputs file and AWS make targets are templates only. All GCP work is additive under new paths.
 
-Doc authority: the Agent refers to the floci-gcp documentation for emulator behavior during implementation. If required information is not found in the first attempt, the Agent consults the User before proceeding.
+Doc authority: the Agent refers to the floci-gcp documentation at https://floci.io/floci-gcp/services/ for emulator behavior during implementation. If required information is not found in the first attempt, the Agent consults the User before proceeding.
 
 New-tree paths used below: compose file gains a GCP service; terragrunt gcp tree with env, root, provider template and four stack dirs; terraform modules-gcp tree with leaf modules plus four composites; scripts gcp dir; k8s GCP overlay dir; GCP outputs JSON; GCP verification script; GCP makefile; GCP data volume dir.
 

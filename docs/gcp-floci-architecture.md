@@ -62,6 +62,8 @@ Same dual-address rule: pods use the compose DNS name on port 4588, host provisi
 
 Round-trips, not describe-only, for the core path: GCS put, get, compare and delete; Secret Manager get plus JSON keys; PubSub publish and pull; Firestore write and read; Cloud SQL TCP plus a version query; KMS encrypt and decrypt; bucket and service account listing; network, subnet and firewall listing; GKE describe plus node listing; backend health plus health endpoint curl from host with in-network fallback; Cloud Run service invoke. BigQuery insert plus query and Cloud Run job execution are stretch-only in Block 8. Plus a state-freshness precheck for emulator reachability and network existence and an orphan drift check for resources live in floci-gcp but absent from GCP state. Optional full plan-all stays behind a slow-plan flag, off by default.
 
+Implemented as scripts/verify-gcp.sh (Block 7): inventory from the four state files, freshness against the live network, round-trips per service, drift of live objects against merged outputs, and an AWS regression section that skips when the AWS emulator is down. First full run passes all GCP checks.
+
 ## 8. Non-breaking rules
 
 Additive only: new compose service, new terragrunt gcp tree, new modules-gcp tree, new GCP scripts, new k8s GCP overlay, new GCP verification script, and this doc. No edits to AWS stacks, AWS provider template, AWS config, AWS scripts, or AWS Makefile targets.
@@ -111,3 +113,18 @@ Container identity: AWS sidecars filter by the floci label. GCP sidecars carry s
 URLs and ports: GCP embeds a configured hostname and base URL in generated URLs, so the hostname must match the compose service for cross-container traffic. AWS relies on path-style addressing plus published ALB ports and a per-resource proxy port range.
 
 Storage options: AWS has no storage mode switch. GCP supports memory, persistent, hybrid and write-ahead-log modes with a persistent path setting.
+
+## 10. Block 7 reconciled inventory and confirmed divergences
+
+State holds 23 resource blocks across four stacks (for_each consolidates instances per block). Planned core was 53 resources; gates rest on outputs plus round-trips, not totals. Differences with reasons:
+
+- Subnets 1 versus 2, firewall rules 1 versus 3, project services 1 block versus 8: config carries the smaller sets; no packet enforcement locally either way.
+- Artifact Registry 0 versus 5: create returns 404 on the emulator, so the module publishes address patterns only and images import into k3s by name.
+- IAM members 1 block versus 5: bindings cover the three service accounts; nothing is enforced locally.
+- Firestore 0 resources versus 1: database create 404s over REST, so the module is an SDK placeholder.
+- Secrets 1 block plus 1 version block versus 3 plus 2: two secrets (app credentials, ArgoCD admin) with versions written at apply time.
+- No second KMS key and no second namespace or null hook: single key suffices; no Vault equivalent, so one ArgoCD namespace and one password hook.
+- SQL round-trip runs through the gateway user path, not direct TCP: the SQL sidecar publishes no host port, and pods use the sidecar IP because pod DNS cannot resolve docker container names.
+- NodePort is dead on this emulator: nothing listens on the node for 30080 on any node IP, so host access is port-forward only. The planned NodePort plus probe path degrades to port-forward plus in-network fallback.
+- Kubeconfig comes from the k3s sidecar extract: the get-credentials override stays unproven and is not needed.
+- AWS regression skips when its emulator is down; both suites have not yet run green together.

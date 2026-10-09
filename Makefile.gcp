@@ -41,6 +41,9 @@ gcp-restart: ## Restart the workloads (picks up a new :latest image and ConfigMa
 	@kubectl --context floci-gcp-smartcloud-cluster rollout restart deployment -n smartcloud
 	@kubectl --context floci-gcp-smartcloud-cluster rollout status deployment/order-service -n smartcloud --timeout=120s
 
+gcp-verify: ## Run the GCP verification suite (round-trips plus drift plus AWS regression)
+	@./scripts/verify-gcp.sh
+
 gcp-kubeconfig: ## Point kubectl at the emulated GKE cluster (needed before the Helm releases)
 	@./scripts/fix-kubeconfig-gcp.sh smartcloud-cluster
 

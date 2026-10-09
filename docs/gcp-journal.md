@@ -90,4 +90,17 @@ Append-only. One entry per block gate.
 - Files changed: docs/gcp-compat-gates.md, terragrunt/gcp/_env/config.yaml, terragrunt/gcp/standard/terragrunt.hcl, terraform/modules-gcp/composite-standard, Makefile.gcp, .gitignore
 - New files: terraform/modules-gcp/argocd, k8s/gcp, scripts/fix-kubeconfig-gcp.sh, scripts/render-k8s-config-gcp.sh, scripts/deploy-gcp.sh, scripts/build-and-import-gcp.sh, scripts/lib/outputs-gcp.sh
 - Tokens: input/output/total not tracked in session
+- Sign-off: user approved
+
+## 2026-10-09T21:27:11Z — Block 7 verification
+
+- Agent: Muse Spark
+- Model: opencode/muse-spark-1.3-contributor-free
+- Block/phase: Block 7 verification, script through full run
+- Summary: Wrote the GCP verification script with inventory, freshness, round-trips, drift, and AWS regression sections; full run passes all GCP checks with the regression skipping while the AWS emulator is down; reconciled 23 state blocks against the planned core with reasons; recorded NodePort dead plus sidecar IP plus sidecar kubeconfig as confirmed divergences.
+- Thought: goal repeatable proof of the core path; why script over ad-hoc checks with gates on outputs plus round-trips; next user verification plus commit.
+- Status: complete, awaiting user verification
+- Files changed: docs/gcp-floci-architecture.md, Makefile.gcp
+- New files: scripts/verify-gcp.sh
+- Tokens: input/output/total not tracked in session
 - Sign-off: pending user verification

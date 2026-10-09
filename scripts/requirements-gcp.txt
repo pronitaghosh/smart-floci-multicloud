@@ -1,0 +1,3 @@
+# GCP verification prerequisites, installed into floci-pyenv.
+# Unpinned: always resolve latest; pip handles the transitive tree.
+google-cloud-firestore

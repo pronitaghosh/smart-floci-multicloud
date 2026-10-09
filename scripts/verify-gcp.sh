@@ -92,6 +92,24 @@ ACK=$(echo "$PULL" | python3 -c "import json,sys; m=json.load(sys.stdin).get('re
 [ -n "$ACK" ] && curl -s -m $TIMEOUT -X POST "$E/v1/projects/$PROJECT/subscriptions/orders-sub:acknowledge" \
   -H "Content-Type: application/json" -d "{\"ackIds\":[\"$ACK\"]}" -o /dev/null
 
+# ---------------------------------------------------------------- Firestore
+hdr "Firestore (SDK write -> read -> delete; REST is gRPC-only)"
+if floci-pyenv/bin/python -c "import google.cloud.firestore" 2>/dev/null; then
+  FIRESTORE_EMULATOR_HOST=localhost:4588 floci-pyenv/bin/python - >"$TMP/fs.txt" 2>&1 <<'PY'
+from google.cloud import firestore
+db = firestore.Client(project="floci-local")
+ref = db.collection("verify").document("gcp-probe")
+ref.set({"ping": "pong"})
+assert ref.get().to_dict() == {"ping": "pong"}, "read mismatch"
+ref.delete()
+print("round-trip ok")
+PY
+  grep -q "round-trip ok" "$TMP/fs.txt" && ok "SDK write/read/delete" \
+    || no "SDK round-trip failed: $(head -c 200 "$TMP/fs.txt")"
+else
+  skip "google-cloud-firestore not installed -- run scripts/setup-gcp-env.sh"
+fi
+
 # ---------------------------------------------------------------- KMS
 hdr "KMS (encrypt -> decrypt)"
 PT=$(printf 'hello-floci-gcp' | base64 -w0)

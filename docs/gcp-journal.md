@@ -103,4 +103,17 @@ Append-only. One entry per block gate.
 - Files changed: docs/gcp-floci-architecture.md, Makefile.gcp
 - New files: scripts/verify-gcp.sh
 - Tokens: input/output/total not tracked in session
-- Sign-off: pending user verification
+- Sign-off: user approved
+
+## 2026-10-09T23:06:31Z — Block 7 follow-up: Firestore SDK plus env setup
+
+- Agent: Muse Spark
+- Model: opencode/muse-spark-1.3-contributor-free
+- Block/phase: Block 7 follow-up, Firestore round-trip plus dependency tracking
+- Summary: Proved Firestore SDK writes and reads against the emulator over gRPC with server log evidence; wired the round-trip into the verification suite; tracked the client in a requirements file with a setup script and a make dependency so fresh clones self-provision.
+- Thought: goal close the Firestore gap reproducibly; why SDK over REST with tracked env; next Block 8 on approval.
+- Status: complete, user verified
+- Files changed: scripts/verify-gcp.sh, Makefile.gcp
+- New files: scripts/requirements-gcp.txt, scripts/setup-gcp-env.sh
+- Tokens: input/output/total not tracked in session
+- Sign-off: user approved

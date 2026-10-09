@@ -29,6 +29,9 @@ gcp-outputs: ## Merge all GCP stack outputs into .outputs-gcp.json for the scrip
 	@./scripts/lib/outputs-gcp.sh --refresh
 	@echo "wrote .outputs-gcp.json"
 
+gcp-deps: ## Install GCP script prerequisites into floci-pyenv
+	@./scripts/setup-gcp-env.sh
+
 ##@ GCP application
 
 gcp-images: ## Build the four service images and import into the emulated GKE
@@ -41,7 +44,7 @@ gcp-restart: ## Restart the workloads (picks up a new :latest image and ConfigMa
 	@kubectl --context floci-gcp-smartcloud-cluster rollout restart deployment -n smartcloud
 	@kubectl --context floci-gcp-smartcloud-cluster rollout status deployment/order-service -n smartcloud --timeout=120s
 
-gcp-verify: ## Run the GCP verification suite (round-trips plus drift plus AWS regression)
+gcp-verify: gcp-deps ## Run the GCP verification suite (round-trips plus drift plus AWS regression)
 	@./scripts/verify-gcp.sh
 
 gcp-kubeconfig: ## Point kubectl at the emulated GKE cluster (needed before the Helm releases)

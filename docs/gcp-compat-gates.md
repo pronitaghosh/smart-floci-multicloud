@@ -18,5 +18,9 @@ Enumerated local workarounds. Each maps to file and field. Honoured only when `g
 | 11 | Artifact Registry create 404s via Terraform and REST; module publishes address pattern only, repos land in Block 6 | terraform/modules-gcp/registry/main.tf | placeholder outputs |
 | 12 | NodePort plus registration instead of LB IPs | terraform/modules-gcp/composite-standard | Block 5 |
 | 16 | Run nginx placeholder probes 80; config port is app contract until Block 6 images | terraform/modules-gcp/cloud-run/main.tf | `container_port = 80` |
+| 17 | Kubeconfig from k3s sidecar extract; get-credentials override unproven | scripts/fix-kubeconfig-gcp.sh | sidecar `k3s.yaml` rewrite |
+| 18 | Pod Postgres address is the sidecar IP; pod DNS cannot resolve docker names | scripts/render-k8s-config-gcp.sh | `DB_HOST` from inspect |
+| 19 | Images imported into k3s by name; Artifact Registry REST 404s | scripts/build-and-import-gcp.sh | `ctr images import` |
+| 20 | Frontend sync deferred; no host-reachable gateway without load balancer | n/a | Block 8 |
 | 13 | No Memorystore; Firestore plus PubSub cover stateful | terragrunt/gcp/_env/config.yaml | no redis section |
 | 14 | BigQuery, LB Terraform, Run job stretch-only | n/a | Block 8 |

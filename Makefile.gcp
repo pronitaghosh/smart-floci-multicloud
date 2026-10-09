@@ -24,3 +24,41 @@ gcp-clean: ## Remove floci-gcp containers only (no AWS, no terraform)
 
 gcp-logs: ## Tail floci-gcp logs
 	@docker compose logs -f floci-gcp
+
+gcp-outputs: ## Merge all GCP stack outputs into .outputs-gcp.json for the scripts
+	@./scripts/lib/outputs-gcp.sh --refresh
+	@echo "wrote .outputs-gcp.json"
+
+##@ GCP application
+
+gcp-images: ## Build the four service images and import into the emulated GKE
+	@./scripts/build-and-import-gcp.sh
+
+gcp-deploy: ## Render config, apply manifests, roll out to the emulated GKE
+	@./scripts/deploy-gcp.sh
+
+gcp-restart: ## Restart the workloads (picks up a new :latest image and ConfigMap)
+	@kubectl --context floci-gcp-smartcloud-cluster rollout restart deployment -n smartcloud
+	@kubectl --context floci-gcp-smartcloud-cluster rollout status deployment/order-service -n smartcloud --timeout=120s
+
+gcp-kubeconfig: ## Point kubectl at the emulated GKE cluster (needed before the Helm releases)
+	@./scripts/fix-kubeconfig-gcp.sh smartcloud-cluster
+
+##@ GCP platform
+
+gcp-argocd-sync: ## Show the ArgoCD application status
+	@kubectl --context floci-gcp-smartcloud-cluster get application -n argocd smartcloud \
+		-o custom-columns=NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status,REVISION:.status.sync.revision \
+		2>/dev/null || echo "  no Application yet -- has the standard stack apply run?"
+
+gcp-argocd-refresh: ## Force ArgoCD to re-read git and reconcile now
+	@kubectl --context floci-gcp-smartcloud-cluster -n argocd annotate application smartcloud \
+		argocd.argoproj.io/refresh=hard --overwrite >/dev/null
+	@echo "refresh requested; watch with: make -f Makefile.gcp gcp-argocd-sync"
+
+gcp-argocd-password: ## Print the ArgoCD admin password from Secret Manager
+	@curl -s -m 10 "$(GCP_ENDPOINT)/v1/projects/floci-local/secrets/smartcloud-argocd-admin/versions/latest:access" \
+		| python3 -c "import json,sys,base64; d=json.load(sys.stdin); print(base64.b64decode(d['payload']['data']).decode())"
+
+gcp-argocd-ui: ## Port-forward the ArgoCD UI to localhost:8080
+	@echo "http://localhost:8080"; kubectl --context floci-gcp-smartcloud-cluster port-forward -n argocd svc/argocd-server 8080:80

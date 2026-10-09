@@ -161,7 +161,9 @@ argocd:
   - name: argocd
     namespace: argocd
     chart_version: "7.7.11"
+    apps_chart_version: "2.0.2"
     repo_url: https://github.com/pronitaghosh/smart-floci-multicloud.git
     target_revision: gcp    # Branch Name
     path: k8s/gcp           # K8 manifests (NOTE: Is it required?)
     destination_namespace: smartcloud
+    admin_password_secret_name: smartcloud-argocd-admin

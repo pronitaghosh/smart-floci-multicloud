@@ -21,13 +21,16 @@ locals {
     ) : (
     "tfr://${include.env.locals.tf_module_repo}${local.submodule}?version=${include.env.locals.tf_module_version}"
   )
+
+  # Static kubeconfig context for the provider blocks below. Matches the
+  # context written by scripts/fix-kubeconfig-gcp.sh.
+  k8s_context = "floci-gcp-${try(local.merged_config_hcl.clusters[0].name, "smartcloud-cluster")}"
 }
 
 # ------------------------------------------------------------------
 # Upstream stacks
 # ------------------------------------------------------------------
-# ArgoCD deferred to Block 6; no IAM/KMS wiring needed here. Mocks keep
-# `plan` working before upstream apply.
+# Mocks keep `plan` working before upstream apply.
 # ------------------------------------------------------------------
 
 dependency "bootstrap" {
@@ -53,6 +56,13 @@ dependency "stateful" {
 terraform {
   source = local.module_source
 
+  # Dummy context so plan works before the kubeconfig script has run. The
+  # real context replaces it; providers only read it at apply time.
+  before_hook "ensure_kubeconfig" {
+    commands = ["plan", "apply", "validate"]
+    execute  = ["bash", "-c", "mkdir -p ~/.kube; touch ~/.kube/config; if ! kubectl config get-contexts \"${local.k8s_context}\" >/dev/null 2>&1; then kubectl config set-cluster dummy --server=https://127.0.0.1:65534 --insecure-skip-tls-verify=true >/dev/null 2>&1 || true; kubectl config set-credentials dummy --token=fake >/dev/null 2>&1 || true; kubectl config set-context \"${local.k8s_context}\" --cluster=dummy --user=dummy >/dev/null 2>&1 || true; fi"]
+  }
+
   # Stash the plan so `plan` and `apply` can be separate CI jobs.
   before_hook "before_copy_tfplan" {
     commands = ["apply"]
@@ -63,6 +73,37 @@ terraform {
     commands = ["plan"]
     execute  = ["bash", "-c", "mkdir -p ${local.tfplan_path} && cp .${basename(get_terragrunt_dir())}.tfplan ${local.tfplan_path} 2>/dev/null || :"]
   }
+}
+
+# ------------------------------------------------------------------
+# Kubernetes providers
+# ------------------------------------------------------------------
+# Providers are configured BEFORE any resource is created, so they cannot
+# read the endpoint of a cluster this same stack is about to build. Reading
+# a static kubeconfig context instead keeps the configuration plan-safe.
+# The context is written by scripts/fix-kubeconfig-gcp.sh, which extracts
+# the k3s admin config from the emulator sidecar (client-cert auth, no
+# get-credentials flow). Cold-start sequence mirrors AWS:
+#   targeted cluster apply, then kubeconfig script, then full apply.
+# ------------------------------------------------------------------
+
+generate "k8s_providers" {
+  path      = "tg-gen-k8s-providers.tf"
+  if_exists = "overwrite_terragrunt"
+
+  contents = <<-EOF
+    provider "kubernetes" {
+      config_path    = pathexpand("~/.kube/config")
+      config_context = "${local.k8s_context}"
+    }
+
+    provider "helm" {
+      kubernetes {
+        config_path    = pathexpand("~/.kube/config")
+        config_context = "${local.k8s_context}"
+      }
+    }
+  EOF
 }
 
 # ------------------------------------------------------------------

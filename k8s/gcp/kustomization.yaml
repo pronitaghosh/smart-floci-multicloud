@@ -1,0 +1,9 @@
+# GCP overlay. ArgoCD reconciles everything under this path; the workload
+# manifests land here as Block 6 progresses. Rendered Secret-derived config
+# stays out of git.
+resources:
+  - 00-namespace.yaml
+  - 10-gateway.yaml
+  - 11-user-service.yaml
+  - 12-order-service.yaml
+  - 13-payment-service.yaml

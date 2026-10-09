@@ -78,3 +78,16 @@ Append-only. One entry per block gate.
 - New files: docs/gcp-journal.md, terraform/modules-gcp/gke, terraform/modules-gcp/cloud-run, terraform/modules-gcp/composite-standard/locals.tf, terraform/modules-gcp/composite-standard/static-modules.tf
 - Tokens: input/output/total not tracked in session
 - Sign-off: user approved
+
+## 2026-10-09T19:58:33Z — Block 6 workloads
+
+- Agent: Muse Spark
+- Model: opencode/muse-spark-1.3-contributor-free
+- Block/phase: Block 6 workloads, ArgoCD plus services through round-trips
+- Summary: Ported the AWS ArgoCD module shape with a Secret Manager REST password hook; kubeconfig comes from the k3s sidecar extract since get-credentials is unproven; four services run on GKE from k3s-imported images after the registry 404 verdict; pod Postgres address is the sidecar IP because pod DNS cannot resolve docker names; user create plus read round-trips pass; frontend sync deferred to Block 8 for lack of a host-reachable gateway.
+- Thought: goal workloads on Block 5 outputs; why sidecar IP plus k3s import plus deferred frontend fit emulator limits; next Block 7 verification.
+- Status: complete, awaiting user verification
+- Files changed: docs/gcp-compat-gates.md, terragrunt/gcp/_env/config.yaml, terragrunt/gcp/standard/terragrunt.hcl, terraform/modules-gcp/composite-standard, Makefile.gcp, .gitignore
+- New files: terraform/modules-gcp/argocd, k8s/gcp, scripts/fix-kubeconfig-gcp.sh, scripts/render-k8s-config-gcp.sh, scripts/deploy-gcp.sh, scripts/build-and-import-gcp.sh, scripts/lib/outputs-gcp.sh
+- Tokens: input/output/total not tracked in session
+- Sign-off: pending user verification

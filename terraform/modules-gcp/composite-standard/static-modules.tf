@@ -21,3 +21,16 @@ module "run" {
 
   depends_on = [module.gke]
 }
+
+#------------------------------------------------------------------
+# Module: ArgoCD
+#------------------------------------------------------------------
+
+module "argocd" {
+  source = "../argocd"
+
+  global_config = local.global
+  argocd_config = local.argocd_config
+
+  depends_on = [module.gke]
+}

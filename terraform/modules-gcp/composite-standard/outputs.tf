@@ -26,3 +26,11 @@ output "run_service_names" {
 output "run_service_uris" {
   value = module.run.service_uris
 }
+
+output "argocd_namespaces" {
+  value = module.argocd.namespaces
+}
+
+output "argocd_port_forward" {
+  value = module.argocd.port_forward_hint
+}

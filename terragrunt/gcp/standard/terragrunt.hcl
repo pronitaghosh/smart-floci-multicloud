@@ -23,6 +23,33 @@ locals {
   )
 }
 
+# ------------------------------------------------------------------
+# Upstream stacks
+# ------------------------------------------------------------------
+# ArgoCD deferred to Block 6; no IAM/KMS wiring needed here. Mocks keep
+# `plan` working before upstream apply.
+# ------------------------------------------------------------------
+
+dependency "bootstrap" {
+  config_path = "../bootstrap"
+
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs_allowed_terraform_commands = ["plan", "validate"]
+  mock_outputs = {
+    network_id = "projects/floci-local/global/networks/smartcloud"
+  }
+}
+
+dependency "stateful" {
+  config_path = "../stateful"
+
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs_allowed_terraform_commands = ["plan", "validate"]
+  mock_outputs = {
+    sql_connection_names = { postgres = "floci-local:us-central1:postgres" }
+  }
+}
+
 terraform {
   source = local.module_source
 
@@ -38,6 +65,22 @@ terraform {
   }
 }
 
+# ------------------------------------------------------------------
+# Inputs
+# ------------------------------------------------------------------
+# The composite still takes exactly one variable. Upstream values are folded
+# into the same YAML document under `resolved:`, so the module never learns
+# that separate states exist.
+# ------------------------------------------------------------------
+
 inputs = {
-  config = local.merged_config
+  config = yamlencode(merge(
+    local.merged_config_hcl,
+    {
+      resolved = {
+        network_id           = dependency.bootstrap.outputs.network_id
+        sql_connection_names = dependency.stateful.outputs.sql_connection_names
+      }
+    }
+  ))
 }

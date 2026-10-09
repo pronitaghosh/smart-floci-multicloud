@@ -17,5 +17,6 @@ Enumerated local workarounds. Each maps to file and field. Honoured only when `g
 | 15 | Secret IDs must be slash-free; provider import regex rejects slashes | terragrunt/gcp/_env/config.yaml | `secrets[].name` dashed |
 | 11 | Artifact Registry create 404s via Terraform and REST; module publishes address pattern only, repos land in Block 6 | terraform/modules-gcp/registry/main.tf | placeholder outputs |
 | 12 | NodePort plus registration instead of LB IPs | terraform/modules-gcp/composite-standard | Block 5 |
+| 16 | Run nginx placeholder probes 80; config port is app contract until Block 6 images | terraform/modules-gcp/cloud-run/main.tf | `container_port = 80` |
 | 13 | No Memorystore; Firestore plus PubSub cover stateful | terragrunt/gcp/_env/config.yaml | no redis section |
 | 14 | BigQuery, LB Terraform, Run job stretch-only | n/a | Block 8 |

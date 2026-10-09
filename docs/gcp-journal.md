@@ -65,3 +65,16 @@ Append-only. One entry per block gate.
 - New files: docs/gcp-journal.md, terraform/modules-gcp stateful modules and composite
 - Tokens: input/output/total not tracked in session
 - Sign-off: user approved
+
+## 2026-10-09T16:30:22Z — Block 5 standard
+
+- Agent: Muse Spark
+- Model: opencode/muse-spark-1.3-contributor-free
+- Block/phase: Block 5 standard, modules through round-trips
+- Summary: Built GKE plus Cloud Run leaf modules and standard composite with resolved merge; applied cluster, node pool, Run service from reviewed plan; fixed nginx probe 8080 to 80 after connection-refused timeout; ArgoCD deferred to Block 6 per user; round-trips pass for host-route and legacy invoke, re-plan stable with no changes.
+- Thought: goal compute platform on stateful outputs; why port 80 matches nginx probe with ArgoCD deferred; next Block 6 workloads on these outputs.
+- Status: complete, user verified and reviewed
+- Files changed: docs/gcp-compat-gates.md, terragrunt/gcp/standard/terragrunt.hcl, terraform/modules-gcp/composite-standard/outputs.tf
+- New files: docs/gcp-journal.md, terraform/modules-gcp/gke, terraform/modules-gcp/cloud-run, terraform/modules-gcp/composite-standard/locals.tf, terraform/modules-gcp/composite-standard/static-modules.tf
+- Tokens: input/output/total not tracked in session
+- Sign-off: user approved
